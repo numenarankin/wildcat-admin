@@ -34,8 +34,10 @@
     "d3-scale": "^4.0.2",
     "date-fns": "^3.6.0",
     "framer-motion": "^12.42.2",
+    "heic-convert": "^2.1.0",
     "jszip": "^3.10.1",
     "lucide-react": "^1.18.0",
+    "mammoth": "^1.13.0",
     "mapbox-gl": "^3.32.0",
     "marked": "^18.0.5",
     "next": "^16.3.0",
@@ -64,6 +66,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
     "@types/geojson": "^7946.0.16",
+    "@types/heic-convert": "^2.1.1",
     "@types/node": "^20.19.43",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

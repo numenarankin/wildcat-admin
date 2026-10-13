@@ -1,0 +1,533 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *):not(:is(.light, .light *)));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --secondary-text: oklch(0.45 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --secondary-text: oklch(0.75 0 0);
+}
+
+/*
+ * The /admin side: the dark theme with the ground taken down to near black.
+ * Applied together with `.dark` (which supplies every token this leaves
+ * alone) on the shell wrapper for the server render and on <html> once
+ * hydrated, so portalled surfaces (menus, dialogs, toasts) match.
+ */
+.admin {
+  /* Native scrollbars (the window's, and any pane without a custom one) draw
+     in the browser's dark set. On <html> after hydration, so the page
+     scrollbar itself turns. */
+  color-scheme: dark;
+  --background: oklch(0.08 0 0);
+  --card: oklch(0.13 0 0);
+  --popover: oklch(0.13 0 0);
+  --secondary: oklch(0.2 0 0);
+  --muted: oklch(0.2 0 0);
+  --accent: oklch(0.2 0 0);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --sidebar: oklch(0.08 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-border: oklch(1 0 0 / 8%);
+}
+
+/*
+ * A light island inside the dark admin (the Email page): the :root tokens
+ * again, after `.admin` so they win, and the `dark:` variant skips it.
+ */
+.light {
+  color-scheme: light;
+  --secondary-text: oklch(0.45 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/*
+ * Design-token vocabulary ported from the previous project, mapped onto this
+ * app's light theme so the ported KB / AI prototype components render
+ * correctly without rewriting every utility class.
+ */
+@theme inline {
+  --color-primary-text: var(--foreground);
+  --color-secondary-text: var(--secondary-text);
+  --color-tertiary-text: var(--muted-foreground);
+  --color-background-surface: var(--card);
+  --color-background-subtle: var(--muted);
+  --color-background-elevated: var(--secondary);
+  --color-background-hover: var(--accent);
+  --color-data-accent: oklch(0.55 0.21 264);
+  --color-error: oklch(0.58 0.22 27);
+  --color-info: oklch(0.6 0.16 250);
+  --color-warning: oklch(0.7 0.16 70);
+  --color-success: oklch(0.6 0.15 150);
+}
+
+/* Typography utilities (ty-*) from the previous project's type scale. */
+@utility ty-body-1 {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+@utility ty-body-2 {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+@utility ty-caption {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+/* Scrolls, without the chrome. For panes that are obviously scrollable from
+   their content (tables, lists inside a card) where a permanent gutter and a
+   grey bar only add clutter. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* A scrollbar that is not there until it is wanted: no bar and NO GUTTER at
+   rest, a thin trackless thumb once the pane is hovered.
+
+   The zero width at rest is the point, not just the invisibility. A classic
+   scrollbar is subtracted from the content box, so merely making the thumb
+   transparent still reserves its column — which reads as a strip of bare
+   container down the right edge that every row's background and rule stop short
+   of. Rows are a few pixels narrower while the pane is hovered, which is the
+   trade: the bar is only there while it is being used.
+
+   Firefox gets `none` → `thin`, which is as far as it can be pushed; the track
+   and thumb colours are WebKit only. Sized on both axes, so a horizontal
+   scroller (a kanban's row of columns) gets the same thumb as a vertical one. */
+@utility slim-scrollbar {
+  scrollbar-width: none;
+  &:hover {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+  &:hover::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}
+
+/* The same trackless thumb as `slim-scrollbar`, minus the layout shift.
+
+   `slim-scrollbar` trades a stable width for a zero-width gutter at rest, which
+   is right for a pane of rows inside a card and wrong for a column of prose:
+   the bar appearing on hover narrows the measure and the text reflows under the
+   pointer. Here the gutter is always reserved and only the THUMB fades in, so
+   nothing moves. */
+@utility quiet-scrollbar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  &:hover {
+    scrollbar-color: var(--border) transparent;
+  }
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply bg-background font-sans;
+    /* The root carries the ground too, not only <body>: the viewport's
+       canvas (the reserved scrollbar gutter below, overscroll) is painted from
+       the root, and without this it stayed white beside a dark page. */
+    /* The window's scrollbar keeps its lane whether or not the page needs
+       one. Without this a page that grows past the viewport (a table row
+       expanding) makes the scrollbar appear, the content narrows by its width,
+       and every width-fitted chart above the table re-lays out and jumps. */
+    scrollbar-gutter: stable;
+  }
+}
+
+/* Tiptap rich-text content (task description, etc.). */
+.tiptap:focus {
+  outline: none;
+}
+.tiptap p {
+  margin: 0.25rem 0;
+}
+.tiptap h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+}
+.tiptap h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+}
+.tiptap h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0.25rem;
+}
+.tiptap ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+.tiptap ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0.25rem 0;
+}
+/* Checklists: the checkbox IS the marker, so no disc and no indent for one.
+   The item carries its own 1.25rem marker column (see `task-list-item.tsx`),
+   which is what lines its text up with bullet and numbered text. */
+.tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.25rem 0;
+}
+/* The React node view wraps each item in a div of its own; neither that nor
+   the li may add an indent on top of the marker column. */
+.tiptap ul[data-type="taskList"] > div,
+.tiptap ul[data-type="taskList"] li {
+  margin-left: 0;
+  padding-left: 0;
+}
+/* The paragraph inside a checklist line carries no margin of its own, or the
+   text drops below the box beside it. A DESCENDANT selector, not `li > div > p`:
+   the React node view nests the content two divs deep (its own wrapper, then
+   ProseMirror's contentDOM inside it). */
+.tiptap ul[data-type="taskList"] li p {
+  margin: 0;
+}
+.tiptap blockquote {
+  border-left: 2px solid var(--border);
+  padding-left: 0.75rem;
+  color: var(--muted-foreground);
+  margin: 0.5rem 0;
+}
+.tiptap a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+/* Placeholder shown when the editor is empty. */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+/* Facilities canvas — marching-ants flow animation along substance flowlines.
+   stroke-dashoffset decreasing makes the dashes travel source → target. */
+@keyframes facility-flow {
+  to {
+    stroke-dashoffset: -26;
+  }
+}
+.facility-flow {
+  animation: facility-flow 1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .facility-flow {
+    animation: none;
+  }
+}
+
+/* --- Voice overlay motion ------------------------------------------------
+ * Orb state changes are meaningful (listening → thinking → speaking), so they
+ * dissolve rather than snap: the outgoing design fades out and expands slightly
+ * while the incoming one fades in from slightly small, which reads as one orb
+ * changing rather than two swapping. Captions rise as they arrive.
+ */
+@keyframes orb-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes orb-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.06); }
+}
+@keyframes caption-in {
+  from { opacity: 0; transform: translateY(0.375rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@utility animate-orb-in {
+  animation: orb-in 450ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@utility animate-orb-out {
+  animation: orb-out 450ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@utility animate-caption-in {
+  animation: caption-in 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-in,
+  .animate-orb-out,
+  .animate-caption-in {
+    animation: none;
+  }
+  .animate-orb-out { opacity: 0; }
+}
+
+
+/*
+ * No spinners on number inputs, anywhere.
+ *
+ * Every numeric field in this app is a gauge, a volume or a percentage typed
+ * off a sheet or a meter face. Nobody nudges 137.25 barrels one step at a time,
+ * and the arrows only sit there catching stray clicks and eating width.
+ */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* --- Document scan sweep -------------------------------------------------
+ * The bar that travels over a document while it is being read, the way a
+ * flatbed scanner's lamp does. It is the ONLY signal that the read is running
+ * on that screen, so it moves on a slow, even cycle: a fast sweep reads as a
+ * progress bar and invites the user to expect it to finish.
+ */
+@keyframes scan-sweep {
+  0%   { transform: translateX(-40%); }
+  50%  { transform: translateX(140%); }
+  100% { transform: translateX(-40%); }
+}
+@utility animate-scan-sweep {
+  animation: scan-sweep 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-scan-sweep {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
+/* --- Mapbox popups on the dark side ---------------------------------------
+ * mapbox-gl.css paints popups (and their tips) white, and admin text is light,
+ * so a hover card on the Prospecting map would be light-on-white. One class
+ * more specific than Mapbox's own rules, so import order does not matter.
+ */
+.dark .mapboxgl-popup-content {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+}
+.dark .mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.dark .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.dark .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  border-bottom-color: var(--popover);
+}
+.dark .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.dark .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.dark .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: var(--popover);
+}
+.dark .mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  border-right-color: var(--popover);
+}
+.dark .mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  border-left-color: var(--popover);
+}
+
+/* --- Collapsed sidebar sizing ----------------------------------------------
+ * Driven by `--sidebar-icon-size`, which SidebarProvider sets from
+ * SIDEBAR_ICON_SIZE (components/ui/sidebar.tsx): icon at that size, button
+ * 10px of padding around it. Unlayered, so it outranks the button's layered
+ * `[&_svg]:size-4` and the logo's `size-4`.
+ */
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-button"] {
+  width: calc(var(--sidebar-icon-size) + 20px);
+  height: calc(var(--sidebar-icon-size) + 20px);
+  padding: 10px;
+}
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-button"] svg,
+.group[data-collapsible="icon"] [data-slot="sidebar-menu-button"] img {
+  width: var(--sidebar-icon-size);
+  height: var(--sidebar-icon-size);
+}

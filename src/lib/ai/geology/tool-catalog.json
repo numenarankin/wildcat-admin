@@ -1,0 +1,2818 @@
+{
+ "tools": [
+  {
+   "name": "las_validate",
+   "group": "A",
+   "module": "tools.las",
+   "signature": "(parsed: 'Any', *, treat_as_las_20: 'bool' = False, index_tolerance: 'float | None' = None, check_undeclared_nulls: 'bool' = True, extra_null_sentinels: 'Sequence[float]' = ()) -> 'ValidationReport | Refusal'",
+   "required": [],
+   "optional": [
+    "treat_as_las_20: bool",
+    "index_tolerance: num?",
+    "check_undeclared_nulls: bool",
+    "extra_null_sentinels: num[]"
+   ],
+   "summary": "Report every deviation from the corpus-held LAS 2.0 rules."
+  },
+  {
+   "name": "curve_inventory",
+   "group": "A",
+   "module": "tools.las",
+   "signature": "(las_file: \"'LasFile'\", *, scrubbed_columns: \"'Sequence[Sequence[Any]] | None'\" = None, null_basis: 'Any' = None, **kw: 'Any')",
+   "required": [],
+   "optional": [
+    "scrubbed_columns: any[][]?",
+    "null_basis: obj"
+   ],
+   "summary": "Inventory the curves of a parsed LAS file."
+  },
+  {
+   "name": "header_extract",
+   "group": "A",
+   "module": "tools.header",
+   "signature": "(sections: 'Any', *, source_file: 'str | None' = None, strict_units: 'bool' = False) -> 'HeaderExtract | Refusal'",
+   "required": [
+    "sections: obj"
+   ],
+   "optional": [
+    "source_file: str?",
+    "strict_units: bool"
+   ],
+   "summary": "Well identity and operational metadata, checked against RRC items A-P."
+  },
+  {
+   "name": "document_extract",
+   "group": "A",
+   "module": "tools.documents",
+   "signature": "(document_id: 'str', pages: 'Sequence[str]', doc_type: 'str', fields: 'Sequence[str] | None' = None) -> 'Refusal'",
+   "required": [
+    "document_id: str",
+    "pages: str[]",
+    "doc_type: str"
+   ],
+   "optional": [
+    "fields: str[]?"
+   ],
+   "summary": "Structured fields from a non-RRC document. Always refuses \u2014 see module docstring."
+  },
+  {
+   "name": "raster_header_ocr",
+   "group": "A",
+   "module": "tools.raster",
+   "signature": "(ocr_text: 'str | None' = None, *, ocr_lines: 'Sequence[Mapping[str, Any]] | None' = None, las_header: 'Mapping[str, Any] | None' = None, image_path: 'str | None' = None, plausibility_overrides: 'Mapping[str, tuple[float, float]] | None' = None, min_confidence: 'float | None' = None) -> 'RasterHeader | Refusal'",
+   "required": [],
+   "optional": [
+    "ocr_text: str?",
+    "ocr_lines: obj[]?",
+    "las_header: obj?",
+    "image_path: str?",
+    "plausibility_overrides: num?",
+    "min_confidence: num?"
+   ],
+   "summary": "Locate the RRC A-P header items in the recognised text of a scanned log."
+  },
+  {
+   "name": "raster_curve_digitize",
+   "group": "A",
+   "module": "tools.raster",
+   "signature": "(polyline_px: 'Sequence[tuple[float, float]]', scale: 'TrackScale', depth_register: 'Any', trace_source: 'str', mnemonic: 'str' = '', is_backup: 'bool' = False, edge_tolerance_px: 'float' = 0.0) -> 'DigitizedCurve | Refusal'",
+   "required": [
+    "polyline_px: num[][]",
+    "scale: obj",
+    "depth_register: obj",
+    "trace_source: str"
+   ],
+   "optional": [
+    "mnemonic: str",
+    "is_backup: bool",
+    "edge_tolerance_px: num"
+   ],
+   "summary": "Traced polyline + declared scale + depth register -> depth-registered values."
+  },
+  {
+   "name": "raster_depth_register",
+   "group": "A",
+   "module": "tools.raster",
+   "signature": "(tie_points: 'Sequence[TiePoint]', run_id: 'str', *, grid_increment_ft: 'float | None' = None, scale_inches_per_100ft: 'float | None' = None, scan_dpi: 'float | None' = None, scale_disagreement_tolerance_ft: 'float' = 1.0) -> 'DepthRegistration | Refusal'",
+   "required": [
+    "tie_points: int",
+    "run_id: str"
+   ],
+   "optional": [
+    "grid_increment_ft: num?",
+    "scale_inches_per_100ft: num?",
+    "scan_dpi: num?",
+    "scale_disagreement_tolerance_ft: num"
+   ],
+   "summary": "Fit the pixel-to-depth mapping for one logging run from observed tie points."
+  },
+  {
+   "name": "mnemonic_normalize",
+   "group": "A",
+   "module": "tools.mnemonics",
+   "signature": "(mnemonic: 'str', unit: 'str | None' = None, vendor: 'str | None' = None, era: 'int | None' = None, *, register: 'Callable[..., Any] | None' = None, context: 'dict[str, Any] | None' = None, rules: 'tuple[MnemonicRule, ...] | None' = None) -> 'MnemonicMatch | Refusal'",
+   "required": [
+    "mnemonic: str"
+   ],
+   "optional": [
+    "unit: str?",
+    "vendor: str?",
+    "era: int?",
+    "register: obj?",
+    "context: obj?",
+    "rules: obj"
+   ],
+   "summary": "Map one raw curve mnemonic to a canonical curve, or refuse."
+  },
+  {
+   "name": "mnemonic_unknown_register",
+   "group": "A",
+   "module": "tools.mnemonics",
+   "signature": "(mnemonic: 'str', well_id: 'str', *, unit: 'str | None' = None, description: 'str | None' = None, service_company: 'str | None' = None, log_date: 'str | None' = None, era: 'int | None' = None, reason: 'str' = '', depth_start: 'float | None' = None, depth_stop: 'float | None' = None, depth_unit: 'str | None' = None, values: 'Sequence[Any] | None' = None, null_value: 'float | None' = None, source_file: 'str | None' = None, well_name: 'str | None' = None, api: 'str | None' = None, registry_path: 'str | Path | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "mnemonic: str",
+    "well_id: str"
+   ],
+   "optional": [
+    "unit: str?",
+    "description: str?",
+    "service_company: str?",
+    "log_date: str?",
+    "era: int?",
+    "reason: str",
+    "depth_start: num?",
+    "depth_stop: num?",
+    "depth_unit: str?",
+    "values: any[]?",
+    "null_value: num?",
+    "source_file: str?",
+    "well_name: str?",
+    "api: str?",
+    "registry_path: str?"
+   ],
+   "summary": "Record one unmapped mnemonic with its context. Idempotent per (well, file)."
+  },
+  {
+   "name": "unit_convert",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(value: 'float', from_unit: 'str', to_unit: 'str', *, kind: 'str | None' = None, mnemonic: 'str | None' = None, matrix: 'str | None' = None, matrix_source: 'str | None' = None, to_matrix: 'str | None' = None, temperature_sense: 'str | None' = None, trust_declared_unit: 'bool' = False) -> 'Quantity | Refusal'",
+   "required": [
+    "value: num",
+    "from_unit: str",
+    "to_unit: str"
+   ],
+   "optional": [
+    "kind: str?",
+    "mnemonic: str?",
+    "matrix: str?",
+    "matrix_source: str?",
+    "to_matrix: str?",
+    "temperature_sense: str?",
+    "trust_declared_unit: bool"
+   ],
+   "summary": "Convert one declared value, or refuse and say why."
+  },
+  {
+   "name": "null_scrub",
+   "group": "B",
+   "module": "tools.curves",
+   "signature": "(values: 'Sequence[Any]', *, declared_null: 'float | None' = None, mnemonic: 'str' = '', scrub_common: 'bool' = True, candidate_sentinels: 'Sequence[float]' = (), allow_zero_null: 'bool' = False, match_rtol: 'float' = 1e-09, match_atol: 'float' = 1e-09, report_suspects: 'bool' = True, suspect_repeat_frac: 'float' = 0.1, near_sentinel_rtol: 'float' = 0.001) -> 'ScrubbedCurve | Refusal'",
+   "required": [
+    "values: any[]"
+   ],
+   "optional": [
+    "declared_null: num?",
+    "mnemonic: str",
+    "scrub_common: bool",
+    "candidate_sentinels: num[]",
+    "allow_zero_null: bool",
+    "match_rtol: num",
+    "match_atol: num",
+    "report_suspects: bool",
+    "suspect_repeat_frac: num",
+    "near_sentinel_rtol: num"
+   ],
+   "summary": "Replace null sentinels in one LAS column with `None`, and report the rest."
+  },
+  {
+   "name": "depth_resample",
+   "group": "B",
+   "module": "tools.curves",
+   "signature": "(depth: 'Sequence[float]', curves: 'Mapping[str, CurveSpec] | None' = None, *, target_step: 'float', depth_unit: 'str', start: 'float | None' = None, stop: 'float | None' = None, vertical_resolution: 'float | None' = None, max_upsample_ratio: 'float' = 4.0, gap_tolerance_ratio: 'float' = 1.5) -> 'ResampleResult | Refusal'",
+   "required": [
+    "depth: num[]",
+    "target_step: num",
+    "depth_unit: str"
+   ],
+   "optional": [
+    "curves: str?",
+    "start: num?",
+    "stop: num?",
+    "vertical_resolution: num?",
+    "max_upsample_ratio: num",
+    "gap_tolerance_ratio: num"
+   ],
+   "summary": "Put curves on a uniform depth grid, and say what that cost."
+  },
+  {
+   "name": "curve_splice_detect",
+   "group": "B",
+   "module": "tools.curves",
+   "signature": "(depth_ft: 'Sequence[float]', curves: 'Mapping[str, Sequence[Any]]', *, aperture_ft: 'float | None' = None, declared_runs: 'Sequence[RunInterval] | None' = None, offset_tolerance: 'Mapping[str, float] | None' = None, curve_units: 'Mapping[str, str] | None' = None, null_value: 'float | None' = None, allow_curve_step_inference: 'bool' = False) -> 'SpliceReport | Refusal'",
+   "required": [
+    "depth_ft: num[]",
+    "curves: any[]"
+   ],
+   "optional": [
+    "aperture_ft: num?",
+    "declared_runs: obj",
+    "offset_tolerance: obj?",
+    "curve_units: str?",
+    "null_value: num?",
+    "allow_curve_step_inference: bool"
+   ],
+   "summary": "Locate run boundaries and measure each curve's discontinuity across them."
+  },
+  {
+   "name": "datum_resolve",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(*, header: 'Any' = None, raster: 'Any' = None, state_form: 'Mapping[str, Any] | Sequence[Mapping[str, Any]] | None' = None, free_text: 'str | None' = None, precedence: 'Sequence[str]' = ('log_heading', 'las_header', 'state_form', 'free_text'), strict: 'bool' = False, max_elevation_disagreement_ft: 'float | None' = None) -> 'DatumResolution | Refusal'",
+   "required": [],
+   "optional": [
+    "header: obj",
+    "raster: obj",
+    "state_form: obj[]?",
+    "free_text: str?",
+    "precedence: str[]",
+    "strict: bool",
+    "max_elevation_disagreement_ft: num?"
+   ],
+   "summary": "Which reference the log's depths are hung on, and its elevation above MSL."
+  },
+  {
+   "name": "datum_reconcile",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(well_a: 'Any', well_b: 'Any', *, marker_tvd_a_ft: 'float | None' = None, marker_tvd_b_ft: 'float | None' = None, tolerance_ft: 'float' = 0.0) -> 'Quantity | Refusal'",
+   "required": [
+    "well_a: obj",
+    "well_b: obj"
+   ],
+   "optional": [
+    "marker_tvd_a_ft: num?",
+    "marker_tvd_b_ft: num?",
+    "tolerance_ft: num"
+   ],
+   "summary": "Reconcile two wells' elevation references. Tearpock p. 61 (`#24`)."
+  },
+  {
+   "name": "md_to_tvd",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(md1: 'float', md2: 'float', inc1: 'float', inc2: 'float', azi1: 'float', azi2: 'float') -> 'Quantity | Refusal'",
+   "required": [
+    "md1: num",
+    "md2: num",
+    "inc1: num",
+    "inc2: num",
+    "azi1: num",
+    "azi2: num"
+   ],
+   "optional": [],
+   "summary": "TVD increment over one survey interval by minimum curvature."
+  },
+  {
+   "name": "subsea_convert",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(tvd: 'float', kb: 'float | None' = None, datum_resolved: 'bool | None' = None, reference: 'str' = 'KB', deviated: 'bool' = False, *, datum: 'Any' = None, depth_reference: 'str | None' = None, deviation_deg: 'float | None' = None)",
+   "required": [
+    "tvd: num"
+   ],
+   "optional": [
+    "kb: num?",
+    "datum_resolved: bool?",
+    "reference: str",
+    "deviated: bool",
+    "datum: obj",
+    "depth_reference: str?",
+    "deviation_deg: num?"
+   ],
+   "summary": "SSTVD from TVD, against the reference the depths are actually hung on."
+  },
+  {
+   "name": "offset_geometry",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(a: 'Any', b: 'Any', *, distance_unit: 'str' = 'ft') -> 'dict[str, Quantity | Refusal] | Refusal'",
+   "required": [
+    "a: obj",
+    "b: obj"
+   ],
+   "optional": [
+    "distance_unit: str"
+   ],
+   "summary": "Distance and bearing between two wells from coordinates (#19)."
+  },
+  {
+   "name": "structural_dip",
+   "group": "B",
+   "module": "tools.geometry",
+   "signature": "(picks: 'Sequence[Mapping[str, Any]]', *, same_flank: 'bool | None' = None, collinear_tolerance_ratio: 'float' = 0.01) -> 'Quantity | Refusal'",
+   "required": [
+    "picks: obj[]"
+   ],
+   "optional": [
+    "same_flank: bool?",
+    "collinear_tolerance_ratio: num"
+   ],
+   "summary": "Dip of a correlated horizon from two or more subsea picks."
+  },
+  {
+   "name": "contact_project",
+   "group": "C",
+   "module": "tools.contacts",
+   "signature": "(observed_contact: 'Any', *, contact_type: 'str', observed_at: 'str' = '', target_well: 'str' = '', same_reservoir: 'bool | None' = None, pick_uncertainty_ft: 'float | None' = None, reference_location: 'Any' = None, target_location: 'Any' = None, contact_dip_deg: 'Any' = None, contact_dip_azimuth_deg: 'float | None' = None, tilt_construction: 'str | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "observed_contact: obj",
+    "contact_type: str"
+   ],
+   "optional": [
+    "observed_at: str",
+    "target_well: str",
+    "same_reservoir: bool?",
+    "pick_uncertainty_ft: num?",
+    "reference_location: obj",
+    "target_location: obj",
+    "contact_dip_deg: obj",
+    "contact_dip_azimuth_deg: num?",
+    "tilt_construction: str?"
+   ],
+   "summary": "Project a fluid contact from one wellbore to another (#21)."
+  },
+  {
+   "name": "standoff_compute",
+   "group": "C",
+   "module": "tools.contacts",
+   "signature": "(perf_top: 'Any', perf_base: 'Any' = None, *, goc: 'Any' = None, woc: 'Any' = None, contact_uncertainty_ft: 'float | None' = None, perf_depth_uncertainty_ft: 'float' = 0.0, **unsupported: 'Any') -> 'Range | Refusal'",
+   "required": [
+    "perf_top: obj"
+   ],
+   "optional": [
+    "perf_base: obj",
+    "goc: obj",
+    "woc: obj",
+    "contact_uncertainty_ft: num?",
+    "perf_depth_uncertainty_ft: num"
+   ],
+   "summary": "Vertical distance from a proposed perforation to a fluid contact (#22)."
+  },
+  {
+   "name": "column_height",
+   "group": "C",
+   "module": "tools.contacts",
+   "signature": "(top_of_porosity: 'Any', contact: 'Any', *, contact_type: 'str' = '', top_of_porosity_uncertainty_ft: 'float | None' = None, contact_uncertainty_ft: 'float | None' = None, top_of_porosity_source: 'str' = '', base_of_porosity: 'Any' = None, **unsupported: 'Any') -> 'Quantity | Refusal'",
+   "required": [
+    "top_of_porosity: obj",
+    "contact: obj"
+   ],
+   "optional": [
+    "contact_type: str",
+    "top_of_porosity_uncertainty_ft: num?",
+    "contact_uncertainty_ft: num?",
+    "top_of_porosity_source: str",
+    "base_of_porosity: obj"
+   ],
+   "summary": "Gross hydrocarbon column, top of porosity to fluid contact (#23)."
+  },
+  {
+   "name": "matrix_constant_lookup",
+   "group": "C",
+   "module": "tools.formation_water.hingle",
+   "signature": "(lithology: 'str', variant: 'str' = 'wyllie', table: 'str' = 'asquith') -> 'MatrixConstants'",
+   "required": [
+    "lithology: str"
+   ],
+   "optional": [
+    "variant: str",
+    "table: str"
+   ],
+   "summary": "Matrix constants for a stated lithology. Never defaults a lithology."
+  },
+  {
+   "name": "hole_quality",
+   "group": "C",
+   "module": "tools.borehole",
+   "signature": "(depth_ft: 'Sequence[Any]', *, caliper_in: 'Sequence[Any] | None' = None, drho: 'Sequence[Any] | None' = None, bit_size_in: 'Any' = None, casing_shoe_ft: 'Any' = None, washout_diffcal_in: 'float' = 1.0, undergauge_diffcal_in: 'float' = -0.25, rugosity_in_per_ft: 'float' = 0.5, rugosity_window_ft: 'float' = 2.0, drho_suspect: 'float' = 0.2, drho_use_magnitude: 'bool' = False, undergauge_is_bad: 'bool' = False, depth_unit: 'str' = 'ft', caliper_unit: 'str' = 'in') -> 'HoleQuality | Refusal'",
+   "required": [
+    "depth_ft: any[]"
+   ],
+   "optional": [
+    "caliper_in: any[]?",
+    "drho: any[]?",
+    "bit_size_in: obj",
+    "casing_shoe_ft: obj",
+    "washout_diffcal_in: num",
+    "undergauge_diffcal_in: num",
+    "rugosity_in_per_ft: num",
+    "rugosity_window_ft: num",
+    "drho_suspect: num",
+    "drho_use_magnitude: bool",
+    "undergauge_is_bad: bool",
+    "depth_unit: str",
+    "caliper_unit: str"
+   ],
+   "summary": "Per-depth borehole condition, with the gate that fired named on every flag."
+  },
+  {
+   "name": "density_porosity",
+   "group": "C",
+   "module": "tools.conglomerate",
+   "signature": "(rho_b: 'float', lithology: 'str', fluid: 'str' = 'fresh', drho: 'float | None' = None, gas_bearing: 'bool' = False, *, hole_quality: 'Any' = None, depth_md: 'float | None' = None, table: 'str' = 'asquith', rho_ma: 'float | None' = None, rho_ma_source: 'str | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "rho_b: num",
+    "lithology: str"
+   ],
+   "optional": [
+    "fluid: str",
+    "drho: num?",
+    "gas_bearing: bool",
+    "hole_quality: obj",
+    "depth_md: num?",
+    "table: str",
+    "rho_ma: num?",
+    "rho_ma_source: str?"
+   ],
+   "summary": "phi_D = (rho_ma - rho_b) / (rho_ma - rho_fl).  Asquith Eq. 4.7 (#18, p. 40)."
+  },
+  {
+   "name": "neutron_porosity_correct",
+   "group": "C",
+   "module": "tools.petrophysics",
+   "signature": "(phi_n: 'float', *, log_matrix: 'Any', formation_lithology: 'Any', unit: 'str' = 'v/v', log_matrix_source: 'str | None' = None, lithology_source: 'str | None' = None, tool_vendor: 'str | None' = None, tool_model: 'str | None' = None, apply_environmental: 'bool' = False, fallback: 'str | None' = None, phi_d: 'float | None' = None, phi_d_matrix: 'Any' = None, v_shale: 'float | None' = None, depth_ft: 'float | None' = None)",
+   "required": [
+    "phi_n: num",
+    "log_matrix: obj",
+    "formation_lithology: obj"
+   ],
+   "optional": [
+    "unit: str",
+    "log_matrix_source: str?",
+    "lithology_source: str?",
+    "tool_vendor: str?",
+    "tool_model: str?",
+    "apply_environmental: bool",
+    "fallback: str?",
+    "phi_d: num?",
+    "phi_d_matrix: obj",
+    "v_shale: num?",
+    "depth_ft: num?"
+   ],
+   "summary": "Correct a neutron porosity to a stated matrix \u2014 or refuse, which is usual."
+  },
+  {
+   "name": "crossplot_porosity",
+   "group": "C",
+   "module": "tools.petrophysics",
+   "signature": "(phi_n: 'float', phi_d: 'float', *, phi_n_matrix: 'Any', phi_d_matrix: 'Any', formation_lithology: 'Any', unit: 'str' = 'v/v', form: 'str' = 'auto', clean: 'bool | None' = None, gas_free: 'bool | None' = None, v_shale: 'float | None' = None, phi_n_matrix_source: 'str | None' = None, phi_d_matrix_source: 'str | None' = None, lithology_source: 'str | None' = None, overlay_tolerance: 'float' = 0.0, depth_ft: 'float | None' = None)",
+   "required": [
+    "phi_n: num",
+    "phi_d: num",
+    "phi_n_matrix: obj",
+    "phi_d_matrix: obj",
+    "formation_lithology: obj"
+   ],
+   "optional": [
+    "unit: str",
+    "form: str",
+    "clean: bool?",
+    "gas_free: bool?",
+    "v_shale: num?",
+    "phi_n_matrix_source: str?",
+    "phi_d_matrix_source: str?",
+    "lithology_source: str?",
+    "overlay_tolerance: num",
+    "depth_ft: num?"
+   ],
+   "summary": "Neutron-density crossplot porosity, with gas identified rather than averaged."
+  },
+  {
+   "name": "sonic_porosity",
+   "group": "C",
+   "module": "tools.petrophysics",
+   "signature": "(dt_log: 'float', lithology: 'str', fluid: 'str' = 'fresh', method: 'str' = 'wyllie', dt_shale: 'float | None' = None, *, c_constant: 'float' = 1.0, hydrocarbon: 'str | None' = None, dt_ma: 'float | None' = None, table: 'str' = 'asquith') -> 'Quantity | Refusal'",
+   "required": [
+    "dt_log: num",
+    "lithology: str"
+   ],
+   "optional": [
+    "fluid: str",
+    "method: str",
+    "dt_shale: num?",
+    "c_constant: num",
+    "hydrocarbon: str?",
+    "dt_ma: num?",
+    "table: str"
+   ],
+   "summary": "Sonic porosity, with every correction Asquith #16-#17 attaches to it."
+  },
+  {
+   "name": "gas_effect_flag",
+   "group": "C",
+   "module": "tools.petrophysics",
+   "signature": "(phi_n: 'float', phi_d: 'float', *, phi_n_matrix: 'Any', phi_d_matrix: 'Any', formation_lithology: 'Any', unit: 'str' = 'v/v', phi_n_matrix_source: 'str | None' = None, phi_d_matrix_source: 'str | None' = None, lithology_source: 'str | None' = None, overlay_tolerance: 'float' = 0.0, clean: 'bool | None' = None, v_shale: 'float | None' = None, depth_ft: 'float | None' = None)",
+   "required": [
+    "phi_n: num",
+    "phi_d: num",
+    "phi_n_matrix: obj",
+    "phi_d_matrix: obj",
+    "formation_lithology: obj"
+   ],
+   "optional": [
+    "unit: str",
+    "phi_n_matrix_source: str?",
+    "phi_d_matrix_source: str?",
+    "lithology_source: str?",
+    "overlay_tolerance: num",
+    "clean: bool?",
+    "v_shale: num?",
+    "depth_ft: num?"
+   ],
+   "summary": "Neutron-density crossover, the gas indicator.  `aapg#1`, `asquith#20`."
+  },
+  {
+   "name": "vshale",
+   "group": "D",
+   "module": "tools.petrophysics",
+   "signature": "(gr_log: 'float', gr_clean: 'float', gr_shale: 'float', method: 'str' = 'linear', *, gr_curve=None, pick_source=None, depth_ft=None)",
+   "required": [
+    "gr_log: num",
+    "gr_clean: num",
+    "gr_shale: num"
+   ],
+   "optional": [
+    "method: str",
+    "gr_curve: obj",
+    "pick_source: obj",
+    "depth_ft: obj"
+   ],
+   "summary": "Shale volume from gamma ray. Asquith Eqs. 3.1-3.5 (`asquith#15`, pp. 31-35)."
+  },
+  {
+   "name": "temperature_gradient",
+   "group": "D",
+   "module": "tools.petrophysics",
+   "signature": "(surface_temp: 'float', bht: 'float', total_depth: 'float', units=None, *, surface_temp_source=None, bht_source=None)",
+   "required": [
+    "surface_temp: num",
+    "bht: num",
+    "total_depth: num"
+   ],
+   "optional": [
+    "units: obj",
+    "surface_temp_source: obj",
+    "bht_source: obj"
+   ],
+   "summary": "The geothermal gradient m = (BHT - AMST) / TD.  Asquith #9, p. 17."
+  },
+  {
+   "name": "rw_from_sp",
+   "group": "D",
+   "module": "tools.rw",
+   "signature": "(sp_mv: 'float', shale_baseline_mv: 'float', *, bed_thickness_ft: 'float', ri_ohmm: 'float', rm_ohmm: 'float', rm_temp_degf: 'float', rmf_ohmm: 'float', rmf_temp_degf: 'float', formation_temp_degf: 'float', mud_base: 'str', mud_type_text: 'str' = '', sp_correction_factor: 'float | None' = None, ri_curve: 'str' = '', hydrocarbon_bearing: 'bool' = False, shaly: 'bool' = False, k_form: 'str' = '61', report_at_degf: 'float | None' = None) -> 'SpWaterResistivity | Refusal'",
+   "required": [
+    "sp_mv: num",
+    "shale_baseline_mv: num",
+    "bed_thickness_ft: num",
+    "ri_ohmm: num",
+    "rm_ohmm: num",
+    "rm_temp_degf: num",
+    "rmf_ohmm: num",
+    "rmf_temp_degf: num",
+    "formation_temp_degf: num",
+    "mud_base: str"
+   ],
+   "optional": [
+    "mud_type_text: str",
+    "sp_correction_factor: num?",
+    "ri_curve: str",
+    "hydrocarbon_bearing: bool",
+    "shaly: bool",
+    "k_form: str",
+    "report_at_degf: num?"
+   ],
+   "summary": "Formation water resistivity from an SP deflection. Asquith ch. 2."
+  },
+  {
+   "name": "rw_pickett",
+   "group": "D",
+   "module": "tools.rw",
+   "signature": "(rt_ohmm: 'Sequence[float]', phi: 'Sequence[float]', *, wet: 'Sequence[Any] | None', temperature_degf: 'float | None', a: 'float | None' = None, m: 'float | None' = None, depths_ft: 'Sequence[float] | None' = None, rt_invasion_corrected: 'bool' = False, report_at_degf: 'float | None' = None) -> 'PickettFit | Refusal'",
+   "required": [
+    "rt_ohmm: num[]",
+    "phi: num[]",
+    "wet: any[]?",
+    "temperature_degf: num?"
+   ],
+   "optional": [
+    "a: num?",
+    "m: num?",
+    "depths_ft: num[]?",
+    "rt_invasion_corrected: bool",
+    "report_at_degf: num?"
+   ],
+   "summary": "Rw (or a*Rw) and m from a Pickett plot over declared-wet points."
+  },
+  {
+   "name": "archie_sw",
+   "group": "D",
+   "module": "tools.petrophysics",
+   "signature": "(rt: 'float', phi: 'float', rw: 'float', rw_source=None, a: 'float' = 1.0, m: 'float' = 2.0, n: 'float' = 2.0, rt_invasion_corrected: 'bool' = False, *, invasion=None, rw_at_formation_temperature=None, depth_ft=None)",
+   "required": [
+    "rt: num",
+    "phi: num",
+    "rw: num"
+   ],
+   "optional": [
+    "rw_source: obj",
+    "a: num",
+    "m: num",
+    "n: num",
+    "rt_invasion_corrected: bool",
+    "invasion: obj",
+    "rw_at_formation_temperature: obj",
+    "depth_ft: obj"
+   ],
+   "summary": "Sw = (a*Rw / (Rt * phi^m))^(1/n).  Asquith Eq. 7.1 (`asquith#42`, p. 121)."
+  },
+  {
+   "name": "shaly_sand_sw",
+   "group": "D",
+   "module": "tools.saturation",
+   "signature": "(rt: 'float', rw: 'float', rw_source: 'str | None', *, phi_effective: 'float | None' = None, phi_total: 'float | None' = None, vshale: 'float | None' = None, rsh: 'float | None' = None, m_star: 'float | None' = None, n_star: 'float | None' = None, b_mho_per_m_per_meq_ml: 'float | None' = None, qv_meq_per_ml: 'float | None' = None, qv_shale_meq_per_ml: 'float | None' = None, cec_meq_per_100g: 'float | None' = None, swb: 'float | None' = None, rb: 'float | None' = None, rwa: 'float | None' = None, a: 'float' = 1.0, m: 'float' = 2.0, rw_temp_degf: 'float | None' = None, rt_invasion_corrected: 'bool' = False) -> 'ShalySandSpread | Refusal'",
+   "required": [
+    "rt: num",
+    "rw: num",
+    "rw_source: str?"
+   ],
+   "optional": [
+    "phi_effective: num?",
+    "phi_total: num?",
+    "vshale: num?",
+    "rsh: num?",
+    "m_star: num?",
+    "n_star: num?",
+    "b_mho_per_m_per_meq_ml: num?",
+    "qv_meq_per_ml: num?",
+    "qv_shale_meq_per_ml: num?",
+    "cec_meq_per_100g: num?",
+    "swb: num?",
+    "rb: num?",
+    "rwa: num?",
+    "a: num",
+    "m: num",
+    "rw_temp_degf: num?",
+    "rt_invasion_corrected: bool"
+   ],
+   "summary": "Simandoux, Waxman-Smits and dual-water saturation, side by side. Tool #36."
+  },
+  {
+   "name": "invasion_profile",
+   "group": "D",
+   "module": "tools.invasion",
+   "signature": "(r_deep_ohmm: 'float', r_medium_ohmm: 'float', *, rmf_ohmm: 'float', rw_ohmm: 'float', rmf_source: 'str', rw_source: 'str', r_shallow_ohmm: 'float | None' = None, shallow_device: 'str | None' = None, lithology_class: 'str | None' = None, tool_family: 'str | None' = None, rt_corrected_ohmm: 'float | None' = None, rt_corrected_source: 'str | None' = None, profile_declared: 'str | None' = None, profile_source: 'str | None' = None, separation_ratio_tolerance: 'float' = 1.1, salt_ratio_tolerance: 'float' = 1.25, allow_uncorrected_rt: 'bool' = False, depth_ft: 'float | None' = None) -> 'InvasionVerdict | Refusal'",
+   "required": [
+    "r_deep_ohmm: num",
+    "r_medium_ohmm: num",
+    "rmf_ohmm: num",
+    "rw_ohmm: num",
+    "rmf_source: str",
+    "rw_source: str"
+   ],
+   "optional": [
+    "r_shallow_ohmm: num?",
+    "shallow_device: str?",
+    "lithology_class: str?",
+    "tool_family: str?",
+    "rt_corrected_ohmm: num?",
+    "rt_corrected_source: str?",
+    "profile_declared: str?",
+    "profile_source: str?",
+    "separation_ratio_tolerance: num",
+    "salt_ratio_tolerance: num",
+    "allow_uncorrected_rt: bool",
+    "depth_ft: num?"
+   ],
+   "summary": "Characterize invasion from a shallow / medium / deep resistivity triple."
+  },
+  {
+   "name": "microlog_permeability_flag",
+   "group": "D",
+   "module": "tools.invasion",
+   "signature": "(micronormal_ohmm: 'float', microinverse_ohmm: 'float', *, rmc_ohmm: 'float', rm_ohmm: 'float', rmf_ohmm: 'float', caliper_in: 'float', bit_size_in: 'float', mud_type: 'str', rw_ohmm: 'float | None' = None, rm_at_formation_temp_ohmm: 'float | None' = None, header_temps_match: 'bool' = True, separation_tolerance_ohmm: 'float' = 0.0, mudcake_tolerance_in: 'float' = 0.0, enlargement_tolerance_in: 'float' = 1.0, depth_ft: 'float | None' = None) -> 'MicrologFlag | Refusal'",
+   "required": [
+    "micronormal_ohmm: num",
+    "microinverse_ohmm: num",
+    "rmc_ohmm: num",
+    "rm_ohmm: num",
+    "rmf_ohmm: num",
+    "caliper_in: num",
+    "bit_size_in: num",
+    "mud_type: str"
+   ],
+   "optional": [
+    "rw_ohmm: num?",
+    "rm_at_formation_temp_ohmm: num?",
+    "header_temps_match: bool",
+    "separation_tolerance_ohmm: num",
+    "mudcake_tolerance_in: num",
+    "enlargement_tolerance_in: num",
+    "depth_ft: num?"
+   ],
+   "summary": "Permeable or not, from a microlog pair.  asquith#33, p. 90."
+  },
+  {
+   "name": "net_pay_cutoffs",
+   "group": "D",
+   "module": "tools.pay",
+   "signature": "(depth: 'Sequence[float]', *, cutoffs: 'CutoffSet', vsh: 'Sequence[Any]', phi: 'Sequence[Any]', sw: 'Sequence[Any] | None' = None, top: 'float | None' = None, base: 'float | None' = None, depth_unit: 'str' = 'ft', zone: 'str' = '') -> 'NetPaySummation | Refusal'",
+   "required": [
+    "depth: num[]",
+    "cutoffs: obj",
+    "vsh: any[]",
+    "phi: any[]"
+   ],
+   "optional": [
+    "sw: any[]?",
+    "top: num?",
+    "base: num?",
+    "depth_unit: str",
+    "zone: str"
+   ],
+   "summary": "Net reservoir and net pay over an interval, under the caller's cutoffs."
+  },
+  {
+   "name": "passey_toc",
+   "group": "D",
+   "module": "tools.pay",
+   "signature": "(resistivity_ohmm: 'Any', dt_us_ft: 'Any', *, baseline: 'PasseyBaseline', lom: 'PickedValue', delta_toc: 'PickedValue', core_calibrated: 'bool', depth: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "resistivity_ohmm: obj",
+    "dt_us_ft: obj",
+    "baseline: obj",
+    "lom: obj",
+    "delta_toc: obj",
+    "core_calibrated: bool"
+   ],
+   "optional": [
+    "depth: num?"
+   ],
+   "summary": "Eq. 4: TOC(wt%) = d logR * 10^(2.297 - 0.1688*LOM) + dTOC."
+  },
+  {
+   "name": "dst_structure",
+   "group": "E",
+   "module": "tools.dst",
+   "signature": "(ticket: 'Mapping[str, Any]', pressure_unit: 'str' = 'psig')",
+   "required": [
+    "ticket: obj"
+   ],
+   "optional": [
+    "pressure_unit: str"
+   ],
+   "summary": "Structure a parsed DST ticket against the Fig. 8.1 / Fig. 8.5 field lists."
+  },
+  {
+   "name": "dst_validate",
+   "group": "E",
+   "module": "tools.dst",
+   "signature": "(observations: 'Sequence[str]' = (), *, p_ihm_psig: 'float | None' = None, p_fhm_psig: 'float | None' = None, mud_recovery_abnormal: 'bool | None' = None, baseline_straight_and_clear: 'bool | None' = None, curves_smooth: 'bool | None' = None, p_i_initial_psig: 'float | None' = None, p_i_final_psig: 'float | None' = None)",
+   "required": [],
+   "optional": [
+    "observations: str[]",
+    "p_ihm_psig: num?",
+    "p_fhm_psig: num?",
+    "mud_recovery_abnormal: bool?",
+    "baseline_straight_and_clear: bool?",
+    "curves_smooth: bool?",
+    "p_i_initial_psig: num?",
+    "p_i_final_psig: num?"
+   ],
+   "summary": "Assess a DST chart against the Sec. 8.4 named signatures."
+  },
+  {
+   "name": "dst_recovery_volume",
+   "group": "E",
+   "module": "tools.dst",
+   "signature": "(recovered_len_ft: 'float', string_sections: 'Sequence[Mapping[str, Any]] | None', *, prior_fill_len_ft: 'float' = 0.0, gas_cut: 'bool' = False, apply_gas_cut_correction: 'bool' = False)",
+   "required": [
+    "recovered_len_ft: num",
+    "string_sections: obj[]?"
+   ],
+   "optional": [
+    "prior_fill_len_ft: num",
+    "gas_cut: bool",
+    "apply_gas_cut_correction: bool"
+   ],
+   "summary": "Recovered fluid column to barrels, section by section. Example 8.1."
+  },
+  {
+   "name": "pressure_gradient",
+   "group": "E",
+   "module": "tools.pressure",
+   "signature": "(p_upper_psia: 'float', depth_upper_ft: 'float', p_lower_psia: 'float', depth_lower_ft: 'float', depths_are_tvd: 'bool' = True)",
+   "required": [
+    "p_upper_psia: num",
+    "depth_upper_ft: num",
+    "p_lower_psia: num",
+    "depth_lower_ft: num"
+   ],
+   "optional": [
+    "depths_are_tvd: bool"
+   ],
+   "summary": "Fluid gradient from two pressures at two depths. psi/ft."
+  },
+  {
+   "name": "pressure_system_compare",
+   "group": "E",
+   "module": "tools.pressure",
+   "signature": "(p_measured_psi: 'float', p_original_psi: 'float | None' = None, near_original_tolerance: 'float | None' = None, label: 'str' = '')",
+   "required": [
+    "p_measured_psi: num"
+   ],
+   "optional": [
+    "p_original_psi: num?",
+    "near_original_tolerance: num?",
+    "label: str"
+   ],
+   "summary": "Is this interval drained? Measured pressure against its original pressure."
+  },
+  {
+   "name": "formation_pressure_estimate",
+   "group": "E",
+   "module": "tools.pressure",
+   "signature": "(points: 'Sequence[tuple[float, float]]', t_p_hr: 'float', delta_t_min_hr: 'float | None' = None, delta_t_max_hr: 'float | None' = None, storage: 'dict[str, float] | None' = None, rate_stabilized: 'bool' = True, test_type: 'str' = 'buildup')",
+   "required": [
+    "points: num[][]",
+    "t_p_hr: num"
+   ],
+   "optional": [
+    "delta_t_min_hr: num?",
+    "delta_t_max_hr: num?",
+    "storage: num?",
+    "rate_stabilized: bool",
+    "test_type: str"
+   ],
+   "summary": "Horner extrapolation of a buildup straight line to (t_p + dt)/dt = 1. psi."
+  },
+  {
+   "name": "coning_critical_rate",
+   "group": "E",
+   "module": "tools.coning",
+   "signature": "(system: 'str', h_ft: 'float', h_p_ft: 'float | None' = None, *, density_unit: 'str' = 'lb/ft3', **kwargs: 'Any') -> 'Range | Refusal'",
+   "required": [
+    "system: str",
+    "h_ft: num"
+   ],
+   "optional": [
+    "h_p_ft: num?",
+    "density_unit: str"
+   ],
+   "summary": "#47. The spread of published critical rates, not a single number."
+  },
+  {
+   "name": "coning_breakthrough_time",
+   "group": "E",
+   "module": "tools.coning",
+   "signature": "(q_stb_d: 'float', h_ft: 'float', h_p_ft: 'float', *, rho_w_lb_ft3: 'float', rho_o_lb_ft3: 'float', k_h_md: 'float', k_v_md: 'float', mu_o_cp: 'float', b_o_bbl_stb: 'float', phi: 'float', m_water_oil: 'float | None' = None, k_rw_sor: 'float | None' = None, k_ro_swc: 'float | None' = None, mu_w_cp: 'float | None' = None, method: 'str' = 'both', system: 'str' = 'oil_water') -> 'Quantity | Range | Refusal'",
+   "required": [
+    "q_stb_d: num",
+    "h_ft: num",
+    "h_p_ft: num",
+    "rho_w_lb_ft3: num",
+    "rho_o_lb_ft3: num",
+    "k_h_md: num",
+    "k_v_md: num",
+    "mu_o_cp: num",
+    "b_o_bbl_stb: num",
+    "phi: num"
+   ],
+   "optional": [
+    "m_water_oil: num?",
+    "k_rw_sor: num?",
+    "k_ro_swc: num?",
+    "mu_w_cp: num?",
+    "method: str",
+    "system: str"
+   ],
+   "summary": "#48. Time to water breakthrough above the critical rate."
+  },
+  {
+   "name": "coning_rate_schedule",
+   "group": "E",
+   "module": "tools.coning",
+   "signature": "(correlation: 'str', system: 'str', h_ft: 'float', h_p_ft: 'float', *, contact_rise_ft: 'Sequence[float] | None' = None, times_days: 'Sequence[float] | None' = None, contact_rise_ft_per_day: 'float | None' = None, d_t_ft: 'float | None' = None, **kwargs: 'Any') -> 'Range | Refusal'",
+   "required": [
+    "correlation: str",
+    "system: str",
+    "h_ft: num",
+    "h_p_ft: num"
+   ],
+   "optional": [
+    "contact_rise_ft: num[]?",
+    "times_days: num[]?",
+    "contact_rise_ft_per_day: num?",
+    "d_t_ft: num?"
+   ],
+   "summary": "#49. Critical rate re-evaluated as the contact advances on the perforations."
+  },
+  {
+   "name": "perf_length_optimize",
+   "group": "E",
+   "module": "tools.perforation",
+   "signature": "(h_ft: 'float', r_e_ft: 'float', k_h_md: 'float', k_v_md: 'float', k_ro: 'float', b_o_rb_stb: 'float', mu_o_cp: 'float', rho_o_lb_ft3: 'float', rho_w_lb_ft3: 'float', rho_g_lb_ft3: 'float', chart_readings: 'Sequence[Sequence[float]] | None' = None, producing_rate: 'Callable[[float], float] | Sequence[Sequence[float]] | None' = None)",
+   "required": [
+    "h_ft: num",
+    "r_e_ft: num",
+    "k_h_md: num",
+    "k_v_md: num",
+    "k_ro: num",
+    "b_o_rb_stb: num",
+    "mu_o_cp: num",
+    "rho_o_lb_ft3: num",
+    "rho_w_lb_ft3: num",
+    "rho_g_lb_ft3: num"
+   ],
+   "optional": [
+    "chart_readings: num[][]?",
+    "producing_rate: num[][]?"
+   ],
+   "summary": "Optimum perforated length and position. Chierici-Ciucci, Ahmed pp. 611-613."
+  },
+  {
+   "name": "partial_penetration_rate",
+   "group": "F",
+   "module": "tools.perforation",
+   "signature": "(b_ft: 'float', h_ft: 'float', k_h_md: 'float', k_v_md: 'float', r_e_ft: 'float', r_w_ft: 'float', p_e_psi: 'float', p_w_psi: 'float', mu_o_cp: 'float', b_o_rb_stb: 'float', skin: 'float')",
+   "required": [
+    "b_ft: num",
+    "h_ft: num",
+    "k_h_md: num",
+    "k_v_md: num",
+    "r_e_ft: num",
+    "r_w_ft: num",
+    "p_e_psi: num",
+    "p_w_psi: num",
+    "mu_o_cp: num",
+    "b_o_rb_stb: num",
+    "skin: num"
+   ],
+   "optional": [],
+   "summary": "Theoretical producing rate of a partially perforated well. Kozeny, Eq. 14."
+  },
+  {
+   "name": "turner_critical_rate",
+   "group": "F",
+   "module": "tools.liquid_loading",
+   "signature": "(sigma_dyne_cm: 'float', rho_l_lbm_ft3: 'float', rho_g_lbm_ft3: 'float', p_psia: 'float', area_ft2: 'float', t_degr: 'float', z: 'float', *, wellhead_pressure_psia: 'float | None' = None, deviation_deg: 'float | None' = None, tubing_id_in: 'float | None' = None, horizontal: 'bool' = False) -> 'Quantity | Refusal'",
+   "required": [
+    "sigma_dyne_cm: num",
+    "rho_l_lbm_ft3: num",
+    "rho_g_lbm_ft3: num",
+    "p_psia: num",
+    "area_ft2: num",
+    "t_degr: num",
+    "z: num"
+   ],
+   "optional": [
+    "wellhead_pressure_psia: num?",
+    "deviation_deg: num?",
+    "tubing_id_in: num?",
+    "horizontal: bool"
+   ],
+   "summary": "#52. Minimum gas rate to keep liquids lifted, Turner (C = 1.912, the 20% adjustment included). MMscf/d at 60 degF and 14.7 psia."
+  },
+  {
+   "name": "coleman_critical_rate",
+   "group": "F",
+   "module": "tools.liquid_loading",
+   "signature": "(sigma_dyne_cm: 'float', rho_l_lbm_ft3: 'float', rho_g_lbm_ft3: 'float', p_psia: 'float', area_ft2: 'float', t_degr: 'float', z: 'float', *, wellhead_pressure_psia: 'float | None' = None, deviation_deg: 'float | None' = None, tubing_id_in: 'float | None' = None, horizontal: 'bool' = False) -> 'Quantity | Refusal'",
+   "required": [
+    "sigma_dyne_cm: num",
+    "rho_l_lbm_ft3: num",
+    "rho_g_lbm_ft3: num",
+    "p_psia: num",
+    "area_ft2: num",
+    "t_degr: num",
+    "z: num"
+   ],
+   "optional": [
+    "wellhead_pressure_psia: num?",
+    "deviation_deg: num?",
+    "tubing_id_in: num?",
+    "horizontal: bool"
+   ],
+   "summary": "#53. The same calculation without Turner's 20% adjustment (C = 1.593). MMscf/d at 60 degF and 14.7 psia."
+  },
+  {
+   "name": "tubing_velocity",
+   "group": "F",
+   "module": "tools.liquid_loading",
+   "signature": "(q_mmscf_d: 'float', p_psia: 'float', area_ft2: 'float', t_degr: 'float', z: 'float', evaluation_point: 'str | None' = 'wellhead') -> 'Quantity | Refusal'",
+   "required": [
+    "q_mmscf_d: num",
+    "p_psia: num",
+    "area_ft2: num",
+    "t_degr: num",
+    "z: num"
+   ],
+   "optional": [
+    "evaluation_point: str?"
+   ],
+   "summary": "#54. Actual gas velocity in tubing: Hapsari Eq 3 solved for v."
+  },
+  {
+   "name": "gas_gradient",
+   "group": "F",
+   "module": "tools.gradient",
+   "signature": "(p_top_psia: 'float', depth_ft: 'float', gamma_g: 'float', t_top_degr: 'float', t_bottom_degr: 'float', *, method: 'str', flow_state: 'str', q_mscfd: 'float | None' = None, tubing_id_in: 'float | None' = None, roughness_in: 'float' = 0.0023, inclination_deg: 'float' = 0.0, fluid: 'str' = 'natural_gas', y_co2: 'float' = 0.0, y_h2s: 'float' = 0.0, y_n2: 'float' = 0.0, tol: 'float' = 1e-09, n_iter: 'int' = 100)",
+   "required": [
+    "p_top_psia: num",
+    "depth_ft: num",
+    "gamma_g: num",
+    "t_top_degr: num",
+    "t_bottom_degr: num",
+    "method: str",
+    "flow_state: str"
+   ],
+   "optional": [
+    "q_mscfd: num?",
+    "tubing_id_in: num?",
+    "roughness_in: num",
+    "inclination_deg: num",
+    "fluid: str",
+    "y_co2: num",
+    "y_h2s: num",
+    "y_n2: num",
+    "tol: num",
+    "n_iter: int"
+   ],
+   "summary": "Average pressure gradient of a gas column, psi/ft."
+  },
+  {
+   "name": "drawdown_estimate",
+   "group": "F",
+   "module": "tools.inflow",
+   "signature": "(form: 'str', p_r_psia: 'float | None' = None, q_stb_d: 'float | None' = None, j_stb_d_psi: 'float | None' = None, p_b_psia: 'float | None' = None, q_mscf_d: 'float | None' = None, j_mscf_d_psi2: 'float | None' = None, j_mscf_d_psi2_cp: 'float | None' = None, psi_r_psi2_cp: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "form: str"
+   ],
+   "optional": [
+    "p_r_psia: num?",
+    "q_stb_d: num?",
+    "j_stb_d_psi: num?",
+    "p_b_psia: num?",
+    "q_mscf_d: num?",
+    "j_mscf_d_psi2: num?",
+    "j_mscf_d_psi2_cp: num?",
+    "psi_r_psi2_cp: num?"
+   ],
+   "summary": "Sandface drawdown at a proposed rate, from a linear productivity index."
+  },
+  {
+   "name": "gas_ipr",
+   "group": "F",
+   "module": "tools.deliverability",
+   "signature": "(points: 'Sequence[Sequence[float]]', p_r_psia: 'float', method: 'str' = 'backpressure', p_wf_psia: 'Sequence[float] | None' = None, steps: 'int' = 10) -> 'Quantity | Refusal'",
+   "required": [
+    "points: num[][]",
+    "p_r_psia: num"
+   ],
+   "optional": [
+    "method: str",
+    "p_wf_psia: num[]?",
+    "steps: int"
+   ],
+   "summary": "Absolute open flow and the IPR behind it, from a multi-point gas test."
+  },
+  {
+   "name": "perf_standoff_check",
+   "group": "F",
+   "module": "tools.perforation",
+   "signature": "(perf_top_ft: 'float', perf_base_ft: 'float', k_h_md: 'float', k_v_md: 'float', r_e_ft: 'float', goc_ft: 'float | None' = None, woc_ft: 'float | None' = None, h_ft: 'float | None' = None, washout_intervals_ft: 'Sequence[Sequence[float]] | None' = None, net_pay_intervals_ft: 'Sequence[Sequence[float]] | None' = None, max_washout_overlap_frac: 'float | None' = None, min_net_pay_frac: 'float | None' = None, depth_registry_tolerance_ft: 'float' = 2.0, contact_uncertainty_ft: 'float | None' = None)",
+   "required": [
+    "perf_top_ft: num",
+    "perf_base_ft: num",
+    "k_h_md: num",
+    "k_v_md: num",
+    "r_e_ft: num"
+   ],
+   "optional": [
+    "goc_ft: num?",
+    "woc_ft: num?",
+    "h_ft: num?",
+    "washout_intervals_ft: num[][]?",
+    "net_pay_intervals_ft: num[][]?",
+    "max_washout_overlap_frac: num?",
+    "min_net_pay_frac: num?",
+    "depth_registry_tolerance_ft: num",
+    "contact_uncertainty_ft: num?"
+   ],
+   "summary": "Validate a proposed perforated interval. Chierici geometry, Ahmed pp. 581-584."
+  },
+  {
+   "name": "kb_lookup",
+   "group": "F",
+   "module": "tools.kb",
+   "signature": "(table: 'str', key: 'str') -> 'Quantity | Refusal'",
+   "required": [
+    "table: str",
+    "key: str"
+   ],
+   "optional": [],
+   "summary": "Exact-key retrieval from a registered reference table."
+  },
+  {
+   "name": "kb_search",
+   "group": "F",
+   "module": "tools.kb",
+   "signature": "(query: 'str', top_k: 'int' = 5, section: 'str | None' = None, document: 'str | None' = None, require_equations: 'bool' = False, per_doc: 'int' = 2, min_coverage: 'float' = 0.5, min_score: 'float' = 8.0, max_chars: 'int | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "query: str"
+   ],
+   "optional": [
+    "top_k: int",
+    "section: str?",
+    "document: str?",
+    "require_equations: bool",
+    "per_doc: int",
+    "min_coverage: num",
+    "min_score: num",
+    "max_chars: int?"
+   ],
+   "summary": "Retrieve verbatim corpus chunks for a question, with their anchors."
+  },
+  {
+   "name": "geolex_lookup",
+   "group": "G",
+   "module": "tools.lookups",
+   "signature": "(name: 'str', resolve_superseded: 'bool' = True) -> 'Quantity | Refusal'",
+   "required": [
+    "name: str"
+   ],
+   "optional": [
+    "resolve_superseded: bool"
+   ],
+   "summary": "Resolve a Bend Arch outcrop-belt stratigraphic name. See `specs/61-geolex_lookup.md`."
+  },
+  {
+   "name": "basin_prior_lookup",
+   "group": "G",
+   "module": "tools.lookups",
+   "signature": "(location: 'str', fields: 'tuple[str, ...] | None' = None, year: 'int | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "location: str"
+   ],
+   "optional": [
+    "fields: str[]?",
+    "year: int?"
+   ],
+   "summary": "Published regional priors for a location. See `specs/62-basin_prior_lookup.md`."
+  },
+  {
+   "name": "analog_retrieve",
+   "group": "G",
+   "module": "tools.analogs",
+   "signature": "(signature: 'Mapping[str, float]', *, store: 'CaseStore | Sequence[Mapping[str, Any]] | None' = None, min_similarity: 'float' = 0.7, top_k: 'int' = 5, min_shared_features: 'int' = 3, exclude_api: 'str | None' = None, outcome_kinds: 'Sequence[str] | None' = None, scales: 'Mapping[str, float] | None' = None, store_path: 'pathlib.Path | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "signature: obj"
+   ],
+   "optional": [
+    "store: obj[]?",
+    "min_similarity: num",
+    "top_k: int",
+    "min_shared_features: int",
+    "exclude_api: str?",
+    "outcome_kinds: str[]?",
+    "scales: obj?",
+    "store_path: obj"
+   ],
+   "summary": "Previously analysed zones whose curve signatures are close to `signature`."
+  },
+  {
+   "name": "correlation_selector",
+   "group": "G",
+   "module": "tools.lookups",
+   "signature": "(rock_type: 'str', fluid: 'str', vshale: 'float | None' = None, rw_ohmm_at_80f: 'float | None' = None, nacl_ppm: 'float | None' = None, province: 'str | None' = None, available_curves: 'tuple[str, ...] | None' = None, at_irreducible: 'bool | None' = None, well_geometry: 'dict[str, Any] | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "rock_type: str",
+    "fluid: str"
+   ],
+   "optional": [
+    "vshale: num?",
+    "rw_ohmm_at_80f: num?",
+    "nacl_ppm: num?",
+    "province: str?",
+    "available_curves: str[]?",
+    "at_irreducible: bool?",
+    "well_geometry: obj?"
+   ],
+   "summary": "Which published correlations apply here, and which do not, and why not."
+  },
+  {
+   "name": "conflict_detect",
+   "group": "G",
+   "module": "tools.state_checks",
+   "signature": "(state: 'Any', *, rel_tol: 'float' = 0.0, ranges: 'Mapping[str, tuple[float, float, str]] | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "state: obj"
+   ],
+   "optional": [
+    "rel_tol: num",
+    "ranges: num?"
+   ],
+   "summary": "Rule-based contradiction scan over the state object. Determines routing."
+  },
+  {
+   "name": "gate_check",
+   "group": "G",
+   "module": "tools.state_checks",
+   "signature": "(state: 'Any', renders: 'Sequence[str] | str | None' = None, *, washout_cutoff_in: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "state: obj"
+   ],
+   "optional": [
+    "renders: str[]?",
+    "washout_cutoff_in: num?"
+   ],
+   "summary": "The four render gates of `well-log-agent.md:223`, over the state object."
+  },
+  {
+   "name": "provenance_audit",
+   "group": "G",
+   "module": "tools.state_checks",
+   "signature": "(state: 'Any', *, require_anchor: 'bool' = True) -> 'Quantity | Refusal'",
+   "required": [
+    "state: obj"
+   ],
+   "optional": [
+    "require_anchor: bool"
+   ],
+   "summary": "Flag every value in the state object that does not carry its provenance."
+  },
+  {
+   "name": "assumption_registry",
+   "group": "G",
+   "module": "tools.uncertainty",
+   "signature": "(results: 'Any', overrides: 'Mapping[str, Any] | None' = None)",
+   "required": [
+    "results: obj"
+   ],
+   "optional": [
+    "overrides: obj?"
+   ],
+   "summary": "#68 - the ledger of every assumption in play, read off the results."
+  },
+  {
+   "name": "formation_alias_resolve",
+   "group": "G",
+   "module": "tools.regional",
+   "signature": "(raw: 'str', county: 'str | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "raw: str"
+   ],
+   "optional": [
+    "county: str?"
+   ],
+   "summary": "Resolve one operator-typed RRC formation string to the canonical column."
+  },
+  {
+   "name": "reservoir_parameter_lookup",
+   "group": "G",
+   "module": "tools.regional",
+   "signature": "(reservoir: 'str', county: 'str | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "reservoir: str"
+   ],
+   "optional": [
+    "county: str?"
+   ],
+   "summary": "Discovery, cumulative production and completion depths for one RRC field."
+  },
+  {
+   "name": "figure_search",
+   "group": "G",
+   "module": "tools.regional",
+   "signature": "(query: 'str', county: 'str | None' = None, kind: 'str | None' = None, limit: 'int' = 8) -> 'Quantity | Refusal'",
+   "required": [
+    "query: str"
+   ],
+   "optional": [
+    "county: str?",
+    "kind: str?",
+    "limit: int"
+   ],
+   "summary": "Find map and cross-section sheets by what they cover."
+  },
+  {
+   "name": "figure_fetch",
+   "group": "G",
+   "module": "tools.regional",
+   "signature": "(figure_id: 'str') -> 'Quantity | Refusal'",
+   "required": [
+    "figure_id: str"
+   ],
+   "optional": [],
+   "summary": "Hand over one map or cross-section \u2014 the image itself, not a description."
+  },
+  {
+   "name": "confidence_score",
+   "group": "H",
+   "module": "tools.quality",
+   "signature": "(q: 'Quantity | Range | Refusal | Any', input_evidence: 'dict[str, str] | None' = None, assumption_status: 'dict[str, str] | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "q: obj"
+   ],
+   "optional": [
+    "input_evidence: obj?",
+    "assumption_status: obj?"
+   ],
+   "summary": "An ordinal confidence level for one computed field, with its reason."
+  },
+  {
+   "name": "range_sanity",
+   "group": "H",
+   "module": "tools.quality",
+   "signature": "(q: 'Any', kind: 'str | None' = None, extra_bounds: 'dict[str, Bound] | None' = None) -> 'Quantity | Range | Refusal'",
+   "required": [
+    "q: obj"
+   ],
+   "optional": [
+    "kind: str?",
+    "extra_bounds: str?"
+   ],
+   "summary": "Check a computed value against physical bounds. Never changes the value."
+  },
+  {
+   "name": "case_set_build",
+   "group": "H",
+   "module": "tools.session",
+   "signature": "(conflicts: 'list[dict[str, Any]]', weight_bases: 'dict[str, str] | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "conflicts: obj"
+   ],
+   "optional": [
+    "weight_bases: obj?"
+   ],
+   "summary": "Build the weighted case set from detected conflicts (#73)."
+  },
+  {
+   "name": "trajectory_log",
+   "group": "H",
+   "module": "tools.session",
+   "signature": "(events: 'list[dict[str, Any]]', session_id: 'str', clock: 'Callable[[], str] | None' = None, log: 'TrajectoryLog | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "events: obj",
+    "session_id: str"
+   ],
+   "optional": [
+    "clock: str?",
+    "log: obj"
+   ],
+   "summary": "Fold a session's events into an ordered, append-only trajectory (#74)."
+  },
+  {
+   "name": "gas_z_factor",
+   "group": "H",
+   "module": "tools.gas",
+   "signature": "(p_psia: 'float', t_degr: 'float', gamma_g: 'float', fluid: 'str' = 'natural_gas', y_co2: 'float' = 0.0, y_h2s: 'float' = 0.0, y_n2: 'float' = 0.0, tol: 'float' = 1e-12, max_iter: 'int' = 100)",
+   "required": [
+    "p_psia: num",
+    "t_degr: num",
+    "gamma_g: num"
+   ],
+   "optional": [
+    "fluid: str",
+    "y_co2: num",
+    "y_h2s: num",
+    "y_n2: num",
+    "tol: num",
+    "max_iter: int"
+   ],
+   "summary": "Hall-Yarborough, Eqs. 2-36 to 2-39, solved by Newton-Raphson."
+  },
+  {
+   "name": "gas_fvf",
+   "group": "H",
+   "module": "tools.gas",
+   "signature": "(p_psia: 'float', t_degr: 'float', z: 'float', unit: 'str' = 'ft3/scf', p_sc: 'float' = 14.7, t_sc: 'float' = 520.0)",
+   "required": [
+    "p_psia: num",
+    "t_degr: num",
+    "z: num"
+   ],
+   "optional": [
+    "unit: str",
+    "p_sc: num",
+    "t_sc: num"
+   ],
+   "summary": "Bg = 0.02827 zT/p (ft3/scf) or 0.005035 zT/p (bbl/scf). Eqs. 2-53/2-54."
+  },
+  {
+   "name": "gas_viscosity",
+   "group": "H",
+   "module": "tools.gas",
+   "signature": "(t_degr: 'float', rho_g: 'float', gamma_g: 'float', sour: 'bool' = False)",
+   "required": [
+    "t_degr: num",
+    "rho_g: num",
+    "gamma_g: num"
+   ],
+   "optional": [
+    "sour: bool"
+   ],
+   "summary": "Lee-Gonzalez-Eakin, Eqs. 2-63 to 2-66. cp."
+  },
+  {
+   "name": "gas_density",
+   "group": "H",
+   "module": "tools.gas",
+   "signature": "(p_psia: 'float', t_degr: 'float', z: 'float', gamma_g: 'float')",
+   "required": [
+    "p_psia: num",
+    "t_degr: num",
+    "z: num",
+    "gamma_g: num"
+   ],
+   "optional": [],
+   "summary": "rho_g = p*Ma / (z*R*T).  Ahmed Eq. 2-17.  lb/ft3."
+  },
+  {
+   "name": "pseudopressure",
+   "group": "I",
+   "module": "tools.gas",
+   "signature": "(p_psia: 'float', t_degr: 'float', gamma_g: 'float', fluid: 'str' = 'natural_gas', y_co2: 'float' = 0.0, y_h2s: 'float' = 0.0, y_n2: 'float' = 0.0, sour: 'bool | None' = None, step_psi: 'float' = 400.0, p_base_psia: 'float' = 0.0)",
+   "required": [
+    "p_psia: num",
+    "t_degr: num",
+    "gamma_g: num"
+   ],
+   "optional": [
+    "fluid: str",
+    "y_co2: num",
+    "y_h2s: num",
+    "y_n2: num",
+    "sour: bool?",
+    "step_psi: num",
+    "p_base_psia: num"
+   ],
+   "summary": "psi(p) with the PVT grid built from tools/gas.py."
+  },
+  {
+   "name": "backpressure_fit",
+   "group": "I",
+   "module": "tools.deliverability",
+   "signature": "(points=None, p_r_psia: 'float' = None, *, form: 'str' = 'pressure-squared', method: 'str' = 'least-squares', psi_r_psi2_cp: 'float' = None, psi_wf_psi2_cp=None, line_points=None, c_point=None, n_given: 'float' = None)",
+   "required": [],
+   "optional": [
+    "points: obj",
+    "p_r_psia: num",
+    "form: str",
+    "method: str",
+    "psi_r_psi2_cp: num",
+    "psi_wf_psi2_cp: obj",
+    "line_points: obj",
+    "c_point: obj",
+    "n_given: num"
+   ],
+   "summary": "Rawlins-Schellhardt C and n from a multi-point deliverability test."
+  },
+  {
+   "name": "houpeurt_fit",
+   "group": "I",
+   "module": "tools.deliverability",
+   "signature": "(points, p_r_psia: 'float', form: 'str', psi_r: 'float | None' = None)",
+   "required": [
+    "points: obj",
+    "p_r_psia: num",
+    "form: str"
+   ],
+   "optional": [
+    "psi_r: num?"
+   ],
+   "summary": "Houpeurt LIT coefficients a and b from a multi-rate deliverability test."
+  },
+  {
+   "name": "aof_compute",
+   "group": "I",
+   "module": "tools.deliverability",
+   "signature": "(fit: 'Any', psi_wf0: 'float | None' = None)",
+   "required": [
+    "fit: obj"
+   ],
+   "optional": [
+    "psi_wf0: num?"
+   ],
+   "summary": "Absolute open flow potential: the fit evaluated at p_wf = 0."
+  },
+  {
+   "name": "deliverability_test_interpret",
+   "group": "I",
+   "module": "tools.deliverability",
+   "signature": "(flow_periods: 'list[dict]', p_r_psia: 'float', declared_test_type: 'str | None' = None, equal_duration_tol_frac: 'float | None' = None, p_r_return_tol_frac: 'float | None' = None, stabilization_criterion=None, required_rate_sequence: 'str | None' = None)",
+   "required": [
+    "flow_periods: obj",
+    "p_r_psia: num"
+   ],
+   "optional": [
+    "declared_test_type: str?",
+    "equal_duration_tol_frac: num?",
+    "p_r_return_tol_frac: num?",
+    "stabilization_criterion: obj",
+    "required_rate_sequence: str?"
+   ],
+   "summary": "Structure a multi-point or isochronal gas-well test and judge stabilization."
+  },
+  {
+   "name": "gas_ipr_curve",
+   "group": "I",
+   "module": "tools.deliverability",
+   "signature": "(fit: 'Quantity', form: 'str', p_wf_grid: 'Sequence[float] | None' = None, n_points: 'int | None' = None, psi_of_p: 'Callable[[float], float] | None' = None, psi_wf_grid: 'Sequence[float] | None' = None) -> 'list[Quantity] | Refusal'",
+   "required": [
+    "fit: obj",
+    "form: str"
+   ],
+   "optional": [
+    "p_wf_grid: num[]?",
+    "n_points: int?",
+    "psi_of_p: num?",
+    "psi_wf_grid: num[]?"
+   ],
+   "summary": "Tabulate the gas IPR from a fitted deliverability relationship."
+  },
+  {
+   "name": "perforation_skin",
+   "group": "I",
+   "module": "tools.perforating",
+   "signature": "(perf_length_in: 'float | None' = None, shot_density_spf: 'float | None' = None, phasing_deg: 'float | None' = None, perf_radius_in: 'float | None' = None, wellbore_radius_ft: 'float | None' = None, kh_over_kv: 'float | None' = None)",
+   "required": [],
+   "optional": [
+    "perf_length_in: num?",
+    "shot_density_spf: num?",
+    "phasing_deg: num?",
+    "perf_radius_in: num?",
+    "wellbore_radius_ft: num?",
+    "kh_over_kv: num?"
+   ],
+   "summary": "Total perforation skin s_P = s_H + s_V + s_wb. Eqs. (13)-(22)."
+  },
+  {
+   "name": "productivity_ratio",
+   "group": "I",
+   "module": "tools.perforating",
+   "signature": "(re_ft: 'float', rw_ft: 'float', skin: 'Any' = None, *, shot_density_spf: 'float | None' = None, phasing_deg: 'float | None' = None, penetration_in: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "re_ft: num",
+    "rw_ft: num"
+   ],
+   "optional": [
+    "skin: obj",
+    "shot_density_spf: num?",
+    "phasing_deg: num?",
+    "penetration_in: num?"
+   ],
+   "summary": "Fraction of zero-skin steady-state productivity delivered at a given skin."
+  },
+  {
+   "name": "underbalance_recommend",
+   "group": "I",
+   "module": "tools.perforating",
+   "signature": "(k_md: 'float | None' = None, *, lithology: 'str | None' = None, king_1985_underbalance_psi: 'float | None' = None, king_1985_source: 'str | None' = None, perforating_mode: 'str' = 'static') -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "k_md: num?",
+    "lithology: str?",
+    "king_1985_underbalance_psi: num?",
+    "king_1985_source: str?",
+    "perforating_mode: str"
+   ],
+   "summary": "Always refuses. Kept as a name so callers get redirected, not served."
+  },
+  {
+   "name": "perf_config_evaluate",
+   "group": "I",
+   "module": "tools.perforating",
+   "signature": "(*, completion_type: 'str | None', shot_density_spf: 'float', phasing_deg: 'float', penetration_in: 'float', entrance_hole_in: 'float', charge_type: 'str | None', bht_degf: 'float', exposure_hours: 'float', conveyance: 'str | None', reservoir_condition: 'str | None' = None, damage_depth_in: 'float | None' = None, proppant_diameter_in: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "completion_type: str?",
+    "shot_density_spf: num",
+    "phasing_deg: num",
+    "penetration_in: num",
+    "entrance_hole_in: num",
+    "charge_type: str?",
+    "bht_degf: num",
+    "exposure_hours: num",
+    "conveyance: str?"
+   ],
+   "optional": [
+    "reservoir_condition: str?",
+    "damage_depth_in: num?",
+    "proppant_diameter_in: num?"
+   ],
+   "summary": "Assess a proposed perforating gun configuration against the SLB 1992 tables."
+  },
+  {
+   "name": "nacl_equivalent",
+   "group": "J",
+   "module": "tools.formation_water",
+   "signature": "(ions_ppm: 'Mapping[str, float]', total_solids_ppm: 'float | None' = None, concentration_unit: 'str' = 'ppm', analysis_is_complete: 'bool' = True, require_charge_balance: 'bool' = False) -> 'Quantity | Refusal'",
+   "required": [
+    "ions_ppm: obj"
+   ],
+   "optional": [
+    "total_solids_ppm: num?",
+    "concentration_unit: str",
+    "analysis_is_complete: bool",
+    "require_charge_balance: bool"
+   ],
+   "summary": "Total equivalent NaCl concentration, in ppm, of a multi-ion water analysis."
+  },
+  {
+   "name": "rw_from_tds",
+   "group": "J",
+   "module": "tools.formation_water",
+   "signature": "(nacl_equivalent_ppm: 'float', temperature_degf: 'float', *, concentration_basis: 'str' = 'nacl_equivalent', concentration_units: 'str' = 'ppm') -> 'Refusal'",
+   "required": [
+    "nacl_equivalent_ppm: num",
+    "temperature_degf: num"
+   ],
+   "optional": [
+    "concentration_basis: str",
+    "concentration_units: str"
+   ],
+   "summary": "Rw from equivalent-NaCl concentration. **Always refuses** \u2014 see module docstring."
+  },
+  {
+   "name": "produced_water_query",
+   "group": "J",
+   "module": "tools.formation_water",
+   "signature": "(county: 'str | None' = None, state: 'str | None' = None, formation: 'str | None' = None, depth_ft: 'tuple[float | None, float | None] | None' = None, dataset: 'ProducedWaterDataset | None' = None, min_samples: 'int | None' = None, max_tds_ratio: 'float | None' = None, include_samples: 'bool' = False) -> 'Quantity | Refusal'",
+   "required": [],
+   "optional": [
+    "county: str?",
+    "state: str?",
+    "formation: str?",
+    "depth_ft: num?",
+    "dataset: obj",
+    "min_samples: int?",
+    "max_tds_ratio: num?",
+    "include_samples: bool"
+   ],
+   "summary": "Regional formation-water TDS (and major-ion suite) for a place."
+  },
+  {
+   "name": "salinity_from_rw",
+   "group": "J",
+   "module": "tools.formation_water",
+   "signature": "(rw_ohm_m: 'float', t_degf: 'float', rw_kind: 'str', t_chart_entry_degf: 'float | None' = None) -> 'Refusal'",
+   "required": [
+    "rw_ohm_m: num",
+    "t_degf: num",
+    "rw_kind: str"
+   ],
+   "optional": [
+    "t_chart_entry_degf: num?"
+   ],
+   "summary": "NaCl-equivalent concentration implied by a formation-water resistivity."
+  },
+  {
+   "name": "hingle_plot",
+   "group": "J",
+   "module": "tools.formation_water",
+   "signature": "(points: 'Sequence[Sequence[float]]', x_axis: 'str', m: 'float', a: 'float', clean_single_lithology: 'bool', *, matrix_value: 'float | None' = None, lithology: 'str | Sequence[str] | None' = None, fluid: 'str' = 'fresh', wet_indices: 'Sequence[int] | None' = None, water_bearing_zone_present: 'bool' = False, wet_rwa_ratio: 'float' = 2.0, n: 'float' = 2.0) -> 'HinglePlot | Refusal'",
+   "required": [
+    "points: num[][]",
+    "x_axis: str",
+    "m: num",
+    "a: num",
+    "clean_single_lithology: bool"
+   ],
+   "optional": [
+    "matrix_value: num?",
+    "lithology: str[]?",
+    "fluid: str",
+    "wet_indices: int?",
+    "water_bearing_zone_present: bool",
+    "wet_rwa_ratio: num",
+    "n: num"
+   ],
+   "summary": "Hingle crossplot: Rw from the water-bearing line, plus porosity per point."
+  },
+  {
+   "name": "es_curve_identify",
+   "group": "J",
+   "module": "tools.vintage_logs",
+   "signature": "(inventory: 'Any', *, normalized: 'Mapping[str, Any] | None' = None, era: 'int | None' = None, strict: 'bool' = False) -> 'EsSuiteIdentification | Refusal'",
+   "required": [
+    "inventory: obj"
+   ],
+   "optional": [
+    "normalized: obj?",
+    "era: int?",
+    "strict: bool"
+   ],
+   "summary": "Classify a curve inventory into the conventional ES suite."
+  },
+  {
+   "name": "departure_correction",
+   "group": "J",
+   "module": "tools.vintage_logs",
+   "signature": "(curve: 'str', bed_thickness_ft: 'float | None', bed_contrast: 'str' = 'resistive', want: 'str' = 'verdict', spacing_in: 'float | None' = None, ao_ft: 'float | None' = None, r16_over_rm: 'float | None' = None, rm_over_rs: 'float | None' = None, r64_over_rs: 'float | None' = None, ra_ohmm: 'float | None' = None, sp_mv: 'float | None' = None, oil_bearing: 'bool | None' = None, ra_max_ohmm: 'float | None' = None, ra_min_ohmm: 'float | None' = None, rs_ohmm: 'float | None' = None, rm_ohmm: 'float | None' = None, hole_diameter_in: 'float | None' = None, assume_row_ft: 'float | None' = None, rm_approx_rs: 'bool | None' = None) -> 'Quantity | Range | Refusal'",
+   "required": [
+    "curve: str",
+    "bed_thickness_ft: num?"
+   ],
+   "optional": [
+    "bed_contrast: str",
+    "want: str",
+    "spacing_in: num?",
+    "ao_ft: num?",
+    "r16_over_rm: num?",
+    "rm_over_rs: num?",
+    "r64_over_rs: num?",
+    "ra_ohmm: num?",
+    "sp_mv: num?",
+    "oil_bearing: bool?",
+    "ra_max_ohmm: num?",
+    "ra_min_ohmm: num?",
+    "rs_ohmm: num?",
+    "rm_ohmm: num?",
+    "hole_diameter_in: num?",
+    "assume_row_ft: num?",
+    "rm_approx_rs: bool?"
+   ],
+   "summary": "Bed-thickness and borehole correction for a vintage normal or lateral."
+  },
+  {
+   "name": "rt_from_long_normal",
+   "group": "J",
+   "module": "tools.vintage_logs",
+   "signature": "(r_16_ohmm: 'float', r_m_ohmm: 'float', r_64_ohmm: 'float | None' = None, bed_thickness_ft: 'float | None' = None, r_s_ohmm: 'float | None' = None, *, r_m_at_formation_temp: 'bool' = False, curves_identified: 'bool' = False, thin_bed_distorted: 'bool' = False, readings_departure_corrected: 'bool' = False, rm_approx_rs: 'bool | None' = None, assume_row_ft: 'float | None' = None)",
+   "required": [
+    "r_16_ohmm: num",
+    "r_m_ohmm: num"
+   ],
+   "optional": [
+    "r_64_ohmm: num?",
+    "bed_thickness_ft: num?",
+    "r_s_ohmm: num?",
+    "r_m_at_formation_temp: bool",
+    "curves_identified: bool",
+    "thin_bed_distorted: bool",
+    "readings_departure_corrected: bool",
+    "rm_approx_rs: bool?",
+    "assume_row_ft: num?"
+   ],
+   "summary": "True formation resistivity Rt from a conventional ES suite."
+  },
+  {
+   "name": "formation_factor_field",
+   "group": "J",
+   "module": "tools.vintage_logs",
+   "signature": "(ro_ohmm: 'float', rw_ohmm: 'float', rw_source: 'str | None', rw_at_formation_temperature: 'bool', wet_evidence: 'str | None', ro_curve: 'str | None', ro_invasion_corrected: 'bool', porosity: 'float | None' = None, a: 'float | None' = None, m: 'float | None' = None, bed_thickness_ft: 'float | None' = None, am_spacing_in: 'float | None' = None, clean_formation: 'bool | None' = None)",
+   "required": [
+    "ro_ohmm: num",
+    "rw_ohmm: num",
+    "rw_source: str?",
+    "rw_at_formation_temperature: bool",
+    "wet_evidence: str?",
+    "ro_curve: str?",
+    "ro_invasion_corrected: bool"
+   ],
+   "optional": [
+    "porosity: num?",
+    "a: num?",
+    "m: num?",
+    "bed_thickness_ft: num?",
+    "am_spacing_in: num?",
+    "clean_formation: bool?"
+   ],
+   "summary": "F = Ro/Rw from an interval certified 100% water-saturated."
+  },
+  {
+   "name": "porosity_from_formation_factor",
+   "group": "J",
+   "module": "tools.vintage_logs",
+   "signature": "(f, a: 'float | None' = None, m: 'float | None' = None, water_bearing: 'bool | None' = None, lithology: 'str | None' = None, f_source: 'str | None' = None)",
+   "required": [
+    "f: obj"
+   ],
+   "optional": [
+    "a: num?",
+    "m: num?",
+    "water_bearing: bool?",
+    "lithology: str?",
+    "f_source: str?"
+   ],
+   "summary": "phi = (a/F)^(1/m).  Asquith Eq. 1.6 inverted, the step Eq. 5.6 performs."
+  },
+  {
+   "name": "analysis_feasibility",
+   "group": "K",
+   "module": "tools.feasibility",
+   "signature": "(inventory: 'Any', *, analyses: 'Sequence[str] | None' = None, normalized: 'Mapping[str, Any] | None' = None, parameters: 'Mapping[str, Any] | None' = None, es_identification: 'Any' = None, degraded_null_fraction: 'float' = 0.5, max_null_fraction: 'float | None' = None) -> 'FeasibilityReport | Refusal'",
+   "required": [
+    "inventory: obj"
+   ],
+   "optional": [
+    "analyses: str[]?",
+    "normalized: obj?",
+    "parameters: obj?",
+    "es_identification: obj",
+    "degraded_null_fraction: num",
+    "max_null_fraction: num?"
+   ],
+   "summary": "Which published analyses this curve inventory supports, and what blocks the rest."
+  },
+  {
+   "name": "cbl_calibration",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(*, tr_spacing_ft: 'float | None' = None, free_pipe_amplitude_mv: 'float | None' = None, bonded_amplitude_mv: 'float | None' = None, free_pipe_attenuation_db_ft: 'float | None' = None, bonded_attenuation_db_ft: 'float | None' = None, free_pipe_provenance: 'str | None' = None, bonded_provenance: 'str | None' = None, anchor_tr_spacing_ft: 'float | None' = None, casing_od_in: 'float | None' = None, casing_weight_lb_ft: 'float | None' = None, cement_type: 'str | None' = None, mud_weight_ppg: 'float | None' = None, mud_type: 'str | None' = None, cement_sheath_thickness_in: 'float | None' = None, amplitude_unit: 'str' = 'mV') -> 'Quantity | Refusal'",
+   "required": [],
+   "optional": [
+    "tr_spacing_ft: num?",
+    "free_pipe_amplitude_mv: num?",
+    "bonded_amplitude_mv: num?",
+    "free_pipe_attenuation_db_ft: num?",
+    "bonded_attenuation_db_ft: num?",
+    "free_pipe_provenance: str?",
+    "bonded_provenance: str?",
+    "anchor_tr_spacing_ft: num?",
+    "casing_od_in: num?",
+    "casing_weight_lb_ft: num?",
+    "cement_type: str?",
+    "mud_weight_ppg: num?",
+    "mud_type: str?",
+    "cement_sheath_thickness_in: num?",
+    "amplitude_unit: str"
+   ],
+   "summary": "Establish the BI = 0 and BI = 1 anchors for one logged interval."
+  },
+  {
+   "name": "cbl_bond_index",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(measured_amplitude: 'float', calibration: 'Any', d_ft: 'float')",
+   "required": [
+    "measured_amplitude: num",
+    "calibration: obj",
+    "d_ft: num"
+   ],
+   "optional": [],
+   "summary": "Bond index from a casing amplitude and a `cbl_calibration` (#102) result."
+  },
+  {
+   "name": "isolation_length_check",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(casing_od_in: 'float | None', bond_index: 'Sequence[float] | float | None' = None, depth_ft: 'Sequence[float] | float | None' = None, *, bi_threshold: 'float' = 0.8, zone_top_ft: 'float | None' = None, zone_base_ft: 'float | None' = None, max_gap_ft: 'float | None' = None, allow_interpolation: 'bool' = False, allow_extrapolation: 'bool' = False, cement_sheath_thickness_in: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "casing_od_in: num?"
+   ],
+   "optional": [
+    "bond_index: num[]?",
+    "depth_ft: num[]?",
+    "bi_threshold: num",
+    "zone_top_ft: num?",
+    "zone_base_ft: num?",
+    "max_gap_ft: num?",
+    "allow_interpolation: bool",
+    "allow_extrapolation: bool",
+    "cement_sheath_thickness_in: num?"
+   ],
+   "summary": "Is there enough continuously well-bonded cement to call the zone isolated?"
+  },
+  {
+   "name": "microannulus_discriminate",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(free_depth_ft: 'Sequence[float] | None', free_amplitude_mv: 'Sequence[float] | None', pressured_depth_ft: 'Sequence[float] | None' = None, pressured_amplitude_mv: 'Sequence[float] | None' = None, *, applied_pressure_psi: 'float | None' = None, min_drop_fraction: 'float | None' = None, cement_type: 'str | None' = None, free_pass_pressure_psi: 'float' = 0.0, depth_tolerance_ft: 'float' = 0.0, interval_ft: 'tuple[float, float] | None' = None, free_pipe_amplitude_mv: 'float | None' = None, formation_transit_time_us_ft: 'float | None' = None, cement_sheath_thickness_in: 'float | None' = None, free_tr_spacing_ft: 'float | None' = None, pressured_tr_spacing_ft: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "free_depth_ft: num[]?",
+    "free_amplitude_mv: num[]?"
+   ],
+   "optional": [
+    "pressured_depth_ft: num[]?",
+    "pressured_amplitude_mv: num[]?",
+    "applied_pressure_psi: num?",
+    "min_drop_fraction: num?",
+    "cement_type: str?",
+    "free_pass_pressure_psi: num",
+    "depth_tolerance_ft: num",
+    "interval_ft: num?",
+    "free_pipe_amplitude_mv: num?",
+    "formation_transit_time_us_ft: num?",
+    "cement_sheath_thickness_in: num?",
+    "free_tr_spacing_ft: num?",
+    "pressured_tr_spacing_ft: num?"
+   ],
+   "summary": "Tell a microannulus from a channel by comparing two CBL passes."
+  },
+  {
+   "name": "vdl_classify",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(amplitude_mv: 'float | Sequence[float]', *, waveform: 'Any' = None, calibration: 'Any' = None, tr_spacing_ft: 'float | None' = None, casing_od_in: 'float | None' = None, cement_type: 'str | None' = None, formation_transit_time_us_per_ft: 'float | None' = None, hours_since_cementing: 'float | None' = None, vdl_tr_spacing_ft: 'float | None' = None, free_pipe_band: 'float' = 0.8, bonded_band: 'float' = 0.2) -> 'Quantity | Refusal'",
+   "required": [
+    "amplitude_mv: num[]"
+   ],
+   "optional": [
+    "waveform: obj",
+    "calibration: obj",
+    "tr_spacing_ft: num?",
+    "casing_od_in: num?",
+    "cement_type: str?",
+    "formation_transit_time_us_per_ft: num?",
+    "hours_since_cementing: num?",
+    "vdl_tr_spacing_ft: num?",
+    "free_pipe_band: num",
+    "bonded_band: num"
+   ],
+   "summary": "Classify a CBL/VDL waveform into the source's four cases."
+  },
+  {
+   "name": "behind_pipe_isolation_check",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(*, depth_ft: 'Sequence[float] | None' = None, bond_index: 'Sequence[float] | None' = None, perf_top_ft: 'float | None' = None, perf_base_ft: 'float | None' = None, water_zone_top_ft: 'float | None' = None, water_zone_base_ft: 'float | None' = None, casing_od_in: 'float | None' = None, bi_basis: 'float | None' = None, depth_basis: 'str' = 'MD', hole_deviated: 'bool | None' = None, formation_transit_time_us_ft: 'float | None' = None, hours_since_cementing: 'float | None' = None, cement_type: 'str | None' = None, log_validity: 'Any' = None, interpolation: 'Any' = None, max_gap_ft: 'float | None' = None)",
+   "required": [],
+   "optional": [
+    "depth_ft: num[]?",
+    "bond_index: num[]?",
+    "perf_top_ft: num?",
+    "perf_base_ft: num?",
+    "water_zone_top_ft: num?",
+    "water_zone_base_ft: num?",
+    "casing_od_in: num?",
+    "bi_basis: num?",
+    "depth_basis: str",
+    "hole_deviated: bool?",
+    "formation_transit_time_us_ft: num?",
+    "hours_since_cementing: num?",
+    "cement_type: str?",
+    "log_validity: obj",
+    "interpolation: obj",
+    "max_gap_ft: num?"
+   ],
+   "summary": "Is there competent cement between the proposed perfs and the water zone?"
+  },
+  {
+   "name": "squeeze_recommend",
+   "group": "K",
+   "module": "tools.cement",
+   "signature": "(*, diagnosis: 'str | None' = None, go_no_go: 'SqueezeGoNoGo | Mapping[str, Any] | None' = None, problem_exists: 'bool | None' = None, magnitude: 'str | None' = None, squeeze_will_correct: 'bool | None' = None, risk_factors: 'Sequence[str] | None' = None, economics_support: 'bool | None' = None, void_type: 'str | None' = None, frac_pressure_psi: 'float | None' = None, injectivity: 'Injectivity | Mapping[str, Any] | None' = None, available_tools: 'Sequence[str] | None' = None, circulation_rate_bblpm: 'float | None' = None, filtrate_control: 'bool | None' = None, critical_wellbore_pressure_psi: 'float | None' = None, objective: 'str' = 'seal_voids', fracturing_required: 'bool | None' = None, squeeze_pressure_obtainable_running: 'bool | None' = None, tools_can_be_run_in_hole: 'bool | None' = None, pull_workstring_acceptable: 'bool | None' = None, openhole_low_pressure_zone_present: 'bool | None' = None, target_depth_ft: 'float | None' = None, bond_index: 'float | None' = None, cbl_amplitude_mv: 'float | None' = None, attenuation_db_ft: 'float | None' = None, vdl_class: 'str | None' = None, isolation_length_ft: 'float | None' = None, log_evidence: 'Mapping[str, Any] | None' = None) -> 'SqueezeRecommendation | Refusal'",
+   "required": [],
+   "optional": [
+    "diagnosis: str?",
+    "go_no_go: obj?",
+    "problem_exists: bool?",
+    "magnitude: str?",
+    "squeeze_will_correct: bool?",
+    "risk_factors: str[]?",
+    "economics_support: bool?",
+    "void_type: str?",
+    "frac_pressure_psi: num?",
+    "injectivity: obj?",
+    "available_tools: str[]?",
+    "circulation_rate_bblpm: num?",
+    "filtrate_control: bool?",
+    "critical_wellbore_pressure_psi: num?",
+    "objective: str",
+    "fracturing_required: bool?",
+    "squeeze_pressure_obtainable_running: bool?",
+    "tools_can_be_run_in_hole: bool?",
+    "pull_workstring_acceptable: bool?",
+    "openhole_low_pressure_zone_present: bool?",
+    "target_depth_ft: num?",
+    "bond_index: num?",
+    "cbl_amplitude_mv: num?",
+    "attenuation_db_ft: num?",
+    "vdl_class: str?",
+    "isolation_length_ft: num?",
+    "log_evidence: obj?"
+   ],
+   "summary": "Select the squeeze technique for a diagnosed cement problem."
+  },
+  {
+   "name": "matrix_density_sensitivity",
+   "group": "K",
+   "module": "tools.conglomerate",
+   "signature": "(rho_b: 'float', matrix_candidates: 'Sequence[object] | None' = None, fluid_candidates: 'Sequence[object] | None' = None, drho: 'float | None' = None) -> 'Range | Refusal'",
+   "required": [
+    "rho_b: num"
+   ],
+   "optional": [
+    "matrix_candidates: obj",
+    "fluid_candidates: obj",
+    "drho: num?"
+   ],
+   "summary": "Sweep density porosity across candidate matrix AND fluid densities."
+  },
+  {
+   "name": "bypassed_pay_scan",
+   "group": "K",
+   "module": "tools.recompletion",
+   "signature": "(depth_ft: 'Sequence[Any]', *, cutoffs: 'Any' = None, perforated_intervals_ft: 'Sequence[Sequence[float]] | None' = None, min_thickness_ft: 'float | None' = None, vsh: 'Sequence[Any] | None' = None, phi: 'Sequence[Any] | None' = None, sw: 'Sequence[Any] | None' = None, net_pay_intervals_ft: 'Sequence[Sequence[float]] | None' = None, relaxed: 'bool' = False, relaxation: 'Relaxation | None' = None, quality: 'Any' = None, reject_unknown_quality: 'bool' = False, depth_registry_tolerance_ft: 'float' = 2.0, step_ft: 'float | None' = None, gap_break_factor: 'float' = 1.5, porosity_kind: 'str | None' = None, depth_unit: 'str' = 'ft') -> 'BypassedPayScan | Refusal'",
+   "required": [
+    "depth_ft: any[]"
+   ],
+   "optional": [
+    "cutoffs: obj",
+    "perforated_intervals_ft: num[][]?",
+    "min_thickness_ft: num?",
+    "vsh: any[]?",
+    "phi: any[]?",
+    "sw: any[]?",
+    "net_pay_intervals_ft: num[][]?",
+    "relaxed: bool",
+    "relaxation: obj",
+    "quality: obj",
+    "reject_unknown_quality: bool",
+    "depth_registry_tolerance_ft: num",
+    "step_ft: num?",
+    "gap_break_factor: num",
+    "porosity_kind: str?",
+    "depth_unit: str"
+   ],
+   "summary": "Intervals that pass net-pay cutoffs and were never perforated."
+  },
+  {
+   "name": "completion_history_compare",
+   "group": "L",
+   "module": "tools.recompletion",
+   "signature": "(*, perforated_intervals_ft: 'Sequence[Sequence[float]] | None' = None, pay_intervals_ft: 'Sequence[Sequence[float]] | None' = None, datum: 'Any' = None, log_depth_reference: 'Any' = None, perforation_depth_reference: 'Any' = None, depth_ft: 'Sequence[Any] | None' = None, vsh: 'Sequence[Any] | None' = None, phi: 'Sequence[Any] | None' = None, sw: 'Sequence[Any] | None' = None, cutoffs: 'Any' = None, relaxed: 'bool' = False, relaxation: 'Relaxation | None' = None, depth_registry_tolerance_ft: 'float | None' = None, min_thickness_ft: 'float | None' = None, quality: 'Any' = None, reject_unknown_quality: 'bool' = False, step_ft: 'float | None' = None, gap_break_factor: 'float | None' = None, porosity_kind: 'str | None' = None, depth_unit: 'str' = 'ft') -> 'CompletionHistoryComparison | Refusal'",
+   "required": [],
+   "optional": [
+    "perforated_intervals_ft: num[][]?",
+    "pay_intervals_ft: num[][]?",
+    "datum: obj",
+    "log_depth_reference: obj",
+    "perforation_depth_reference: obj",
+    "depth_ft: any[]?",
+    "vsh: any[]?",
+    "phi: any[]?",
+    "sw: any[]?",
+    "cutoffs: obj",
+    "relaxed: bool",
+    "relaxation: obj",
+    "depth_registry_tolerance_ft: num?",
+    "min_thickness_ft: num?",
+    "quality: obj",
+    "reject_unknown_quality: bool",
+    "step_ft: num?",
+    "gap_break_factor: num?",
+    "porosity_kind: str?",
+    "depth_unit: str"
+   ],
+   "summary": "What was shot versus what the log calls pay. Reports; does not grade."
+  },
+  {
+   "name": "production_indicator",
+   "group": "L",
+   "module": "tools.recompletion",
+   "signature": "(target: 'Any', offsets: 'Sequence[Any] | None', *, indicator: 'str | None' = None, radius: 'float | None' = None, radius_unit: 'str' = 'ft', pi_percent: 'float | None' = None, domain_statistic: 'str | None' = None, window_years: 'int | None' = None, normalized_year: 'int | None' = None, min_offsets: 'int | None' = None) -> 'dict[str, Quantity | Range] | Refusal'",
+   "required": [
+    "target: obj",
+    "offsets: any[]?"
+   ],
+   "optional": [
+    "indicator: str?",
+    "radius: num?",
+    "radius_unit: str",
+    "pi_percent: num?",
+    "domain_statistic: str?",
+    "window_years: int?",
+    "normalized_year: int?",
+    "min_offsets: int?"
+   ],
+   "summary": "SWARM: one well's production indicator against its offsets in a radius (#112)."
+  },
+  {
+   "name": "recompletion_rank",
+   "group": "L",
+   "module": "tools.recompletion",
+   "signature": "(candidates: 'Iterable[Any]', *, benchmark_usd_per_mcfe: 'float' = 0.5, a_list_min_hits: 'int' = 4, b_list_min_hits: 'int' = 3, min_evaluated_criteria: 'int | None' = None, extra_criteria: 'Sequence[Criterion]' = ()) -> 'RecompletionRanking | Refusal'",
+   "required": [
+    "candidates: any[]"
+   ],
+   "optional": [
+    "benchmark_usd_per_mcfe: num",
+    "a_list_min_hits: int",
+    "b_list_min_hits: int",
+    "min_evaluated_criteria: int?",
+    "extra_criteria: obj"
+   ],
+   "summary": "Place a set of wells on the NETL A and B candidate lists."
+  },
+  {
+   "name": "plugback_vs_squeeze",
+   "group": "L",
+   "module": "tools.cement",
+   "signature": "(*, target_zone_top_ft: 'float | None' = None, target_zone_base_ft: 'float | None' = None, killed_zone_top_ft: 'float | None' = None, killed_zone_base_ft: 'float | None' = None, current_completion_depth_ft: 'float | None' = None, diagnosis: 'str | None' = None, flow_path: 'str | None' = None, communication_depth_ft: 'float | None' = None, mechanical_support: 'str | None' = None, shut_off_perforations: 'bool | None' = None, openhole_low_pressure_zone_present: 'bool | None' = None, casing_condition: 'str | None' = None, casing_grade: 'str | None' = None, casing_leak_depth_ft: 'float | None' = None, casing_corrosion_pct: 'float | None' = None, casing_inspection_log: 'Any' = None) -> 'PlugbackSqueezeDecision | Refusal'",
+   "required": [],
+   "optional": [
+    "target_zone_top_ft: num?",
+    "target_zone_base_ft: num?",
+    "killed_zone_top_ft: num?",
+    "killed_zone_base_ft: num?",
+    "current_completion_depth_ft: num?",
+    "diagnosis: str?",
+    "flow_path: str?",
+    "communication_depth_ft: num?",
+    "mechanical_support: str?",
+    "shut_off_perforations: bool?",
+    "openhole_low_pressure_zone_present: bool?",
+    "casing_condition: str?",
+    "casing_grade: str?",
+    "casing_leak_depth_ft: num?",
+    "casing_corrosion_pct: num?",
+    "casing_inspection_log: obj"
+   ],
+   "summary": "Decide whether the source indicates a cement plug, a squeeze, or both."
+  },
+  {
+   "name": "dst_recompletion_screen",
+   "group": "L",
+   "module": "tools.recompletion",
+   "signature": "(indication, *, price_usd_per_unit=None, price_unit=None, operating_cost_usd_per_well_per_year=None, workover_cost_usd=None, discount_rate_fraction=None, evaluation_year=None, use_damage_corrected=True)",
+   "required": [
+    "indication: obj"
+   ],
+   "optional": [
+    "price_usd_per_unit: obj",
+    "price_unit: obj",
+    "operating_cost_usd_per_well_per_year: obj",
+    "workover_cost_usd: obj",
+    "discount_rate_fraction: obj",
+    "evaluation_year: obj",
+    "use_damage_corrected: obj"
+   ],
+   "summary": "Screen a DST-indicated rate against the caller's own economics."
+  },
+  {
+   "name": "decline_forecast",
+   "group": "L",
+   "module": "tools.decline",
+   "signature": "(t_values: 'Sequence[float]', q_values: 'Sequence[float]', *, time_unit: 'str', rate_time_unit: 'str', rate_volume_unit: 'str', boundary_dominated_flow: 'bool | None' = None, b: 'float | None' = None, fit_from_time: 'float | None' = None, fit_to_time: 'float | None' = None, operating_conditions_constant: 'bool | None' = None, drainage_area_fixed: 'bool | None' = None, producing_at_capacity: 'bool | None' = None, min_r2: 'float | None' = None, b_search_max: 'float' = 2.5, b_form_snap: 'float' = 1e-06, max_increasing_step_fraction: 'float | None' = None)",
+   "required": [
+    "t_values: num[]",
+    "q_values: num[]",
+    "time_unit: str",
+    "rate_time_unit: str",
+    "rate_volume_unit: str"
+   ],
+   "optional": [
+    "boundary_dominated_flow: bool?",
+    "b: num?",
+    "fit_from_time: num?",
+    "fit_to_time: num?",
+    "operating_conditions_constant: bool?",
+    "drainage_area_fixed: bool?",
+    "producing_at_capacity: bool?",
+    "min_r2: num?",
+    "b_search_max: num",
+    "b_form_snap: num",
+    "max_increasing_step_fraction: num?"
+   ],
+   "summary": "Fit Arps q_i, D_i and b to a production history."
+  },
+  {
+   "name": "decline_eur",
+   "group": "L",
+   "module": "tools.decline",
+   "signature": "(qi=None, di=None, q_econ=None, b=None, cumulative_before_fit=0.0, boundary_dominated=None, *, fit=None, rate_unit=None, di_time_unit=None, cumulative_to_date=None)",
+   "required": [],
+   "optional": [
+    "qi: obj",
+    "di: obj",
+    "q_econ: obj",
+    "b: obj",
+    "cumulative_before_fit: obj",
+    "boundary_dominated: obj",
+    "fit: obj",
+    "rate_unit: obj",
+    "di_time_unit: obj",
+    "cumulative_to_date: obj"
+   ],
+   "summary": "EUR integrated to the economic limit, not to infinity."
+  },
+  {
+   "name": "economic_limit_time",
+   "group": "L",
+   "module": "tools.decline",
+   "signature": "(qi: 'float', di: 'float', q_econ: 'float', b: 'float' = 0.0, time_basis: 'str | None' = None, boundary_dominated: 'bool | None' = None)",
+   "required": [
+    "qi: num",
+    "di: num",
+    "q_econ: num"
+   ],
+   "optional": [
+    "b: num",
+    "time_basis: str?",
+    "boundary_dominated: bool?"
+   ],
+   "summary": "Time at which a fitted Arps decline reaches the economic limit rate."
+  },
+  {
+   "name": "hcpv_thickness",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(phi: 'Any', sw: 'Any', thickness_ft: 'Any') -> 'Quantity | Refusal'",
+   "required": [
+    "phi: obj",
+    "sw: obj",
+    "thickness_ft: obj"
+   ],
+   "optional": [],
+   "summary": "Hydrocarbon pore volume thickness, sum of phi (1 - S_w) dh, in feet."
+  },
+  {
+   "name": "volumetrics",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(fluid: 'str', area_acres: 'float | None' = None, *, net_pay_ft: 'float | None' = None, phi: 'float | None' = None, sw: 'float | None' = None, b_i: 'float | None' = None, hcpv_ft: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "fluid: str"
+   ],
+   "optional": [
+    "area_acres: num?",
+    "net_pay_ft: num?",
+    "phi: num?",
+    "sw: num?",
+    "b_i: num?",
+    "hcpv_ft: num?"
+   ],
+   "summary": "STOIIP or OGIP. Ahmed Eq. 4-7 with Eq. 4-5 (oil), Eq. 13-3 (gas)."
+  },
+  {
+   "name": "recovery_factor",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(drive_mechanism: 'str', in_place: 'float | None' = None, in_place_unit: 'str' = 'STB') -> 'Range | Refusal'",
+   "required": [
+    "drive_mechanism: str"
+   ],
+   "optional": [
+    "in_place: num?",
+    "in_place_unit: str"
+   ],
+   "summary": "Recoverable volume under a stated drive, as the published BAND."
+  },
+  {
+   "name": "volumetrics_probabilistic",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(fluid: 'str', seed: 'int', *, area_acres: 'Any' = None, net_pay_ft: 'Any' = None, phi: 'Any' = None, sw: 'Any' = None, b_i: 'Any' = None, samples: 'int' = 10000) -> 'Range | Refusal'",
+   "required": [
+    "fluid: str",
+    "seed: int"
+   ],
+   "optional": [
+    "area_acres: obj",
+    "net_pay_ft: obj",
+    "phi: obj",
+    "sw: obj",
+    "b_i: obj",
+    "samples: int"
+   ],
+   "summary": "P90, P50 and P10 in place, by Monte Carlo over the supplied input ranges."
+  },
+  {
+   "name": "archie_sensitivity",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(rt: 'float', phi: 'float', rw: 'float', rw_source: 'Any' = None, *, a_candidates: 'Sequence[float] | None' = None, m_candidates: 'Sequence[float] | None' = None, n_candidates: 'Sequence[float] | None' = None, rt_invasion_corrected: 'bool' = False) -> 'Range | Refusal'",
+   "required": [
+    "rt: num",
+    "phi: num",
+    "rw: num"
+   ],
+   "optional": [
+    "rw_source: obj",
+    "a_candidates: num[]?",
+    "m_candidates: num[]?",
+    "n_candidates: num[]?",
+    "rt_invasion_corrected: bool"
+   ],
+   "summary": "Sweep Archie's a, m and n and report the resulting S_w band."
+  },
+  {
+   "name": "propagate_uncertainty",
+   "group": "M",
+   "module": "tools.volumetrics",
+   "signature": "(thickness_ft: 'Any', phi_low: 'Sequence[float]', phi_high: 'Sequence[float]', rt: 'Sequence[float]', rw: 'Any', rw_source: 'Any' = None, *, phi_cutoff: 'float', sw_cutoff: 'float', a: 'Any' = 1.0, m: 'Any' = 2.0, n: 'Any' = 2.0, rt_invasion_corrected: 'bool' = False) -> 'Range | Refusal'",
+   "required": [
+    "thickness_ft: obj",
+    "phi_low: num[]",
+    "phi_high: num[]",
+    "rt: num[]",
+    "rw: obj",
+    "phi_cutoff: num",
+    "sw_cutoff: num"
+   ],
+   "optional": [
+    "rw_source: obj",
+    "a: obj",
+    "m: obj",
+    "n: obj",
+    "rt_invasion_corrected: bool"
+   ],
+   "summary": "Carry declared input intervals through porosity, saturation and net pay."
+  },
+  {
+   "name": "permeability_estimate",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(phi: 'float', sw_irr: 'float', *, at_irreducible: 'bool | None' = None, hydrocarbon: 'str | None' = None, rho_h_g_cc: 'float | None' = None, rw: 'float | None' = None, r_irr: 'float | None' = None) -> 'Range | Refusal'",
+   "required": [
+    "phi: num",
+    "sw_irr: num"
+   ],
+   "optional": [
+    "at_irreducible: bool?",
+    "hydrocarbon: str?",
+    "rho_h_g_cc: num?",
+    "rw: num?",
+    "r_irr: num?"
+   ],
+   "summary": "Timur, Wyllie-Rose and Coates-Dumanoir side by side. Asquith #48."
+  },
+  {
+   "name": "kv_kh_ratio",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(k_v_md: 'float | None' = None, k_h_md: 'float | None' = None, *, layer_k_md: 'Sequence[float] | None' = None, layer_thickness_ft: 'Sequence[float] | None' = None, lithology: 'str | None' = None, bedding: 'str | None' = None) -> 'Quantity | Refusal'",
+   "required": [],
+   "optional": [
+    "k_v_md: num?",
+    "k_h_md: num?",
+    "layer_k_md: num[]?",
+    "layer_thickness_ft: num[]?",
+    "lithology: str?",
+    "bedding: str?"
+   ],
+   "summary": "F_k = k_v/k_h. Ahmed Eq. 10-29, from measurements or from layer data."
+  },
+  {
+   "name": "relative_permeability",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(sw: 'float', swc: 'float', sor: 'float', *, model: 'str' = 'analytical', k_ro_swc: 'float | None' = None, k_rw_sor: 'float | None' = None, n_o: 'float' = 1.0, n_w: 'float' = 1.0, formation: 'str | None' = None) -> 'RelativePermeabilityPair | Refusal'",
+   "required": [
+    "sw: num",
+    "swc: num",
+    "sor: num"
+   ],
+   "optional": [
+    "model: str",
+    "k_ro_swc: num?",
+    "k_rw_sor: num?",
+    "n_o: num",
+    "n_w: num",
+    "formation: str?"
+   ],
+   "summary": "Oil-water relative permeability, and the two endpoints coning needs."
+  },
+  {
+   "name": "fractional_flow",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(k_ro: 'float', k_rw: 'float', mu_o_cp: 'float', mu_w_cp: 'float') -> 'Quantity | Refusal'",
+   "required": [
+    "k_ro: num",
+    "k_rw: num",
+    "mu_o_cp: num",
+    "mu_w_cp: num"
+   ],
+   "optional": [],
+   "summary": "Water cut against saturation. Ahmed Eq. 14-19 with Eq. 14-22's neglects."
+  },
+  {
+   "name": "capillary_pressure",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(pc_lab_psi: 'float', *, sigma_lab_dynes_cm: 'float | None' = None, sigma_res_dynes_cm: 'float | None' = None, phi_core: 'float | None' = None, k_core_md: 'float | None' = None, phi_res: 'float | None' = None, k_res_md: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "pc_lab_psi: num"
+   ],
+   "optional": [
+    "sigma_lab_dynes_cm: num?",
+    "sigma_res_dynes_cm: num?",
+    "phi_core: num?",
+    "k_core_md: num?",
+    "phi_res: num?",
+    "k_res_md: num?"
+   ],
+   "summary": "Laboratory capillary pressure at reservoir conditions. Ahmed Eq. 4-37."
+  },
+  {
+   "name": "saturation_height",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(height_above_fwl_ft: 'float', delta_rho_lb_ft3: 'float', *, method: 'str' = 'analytical', swc: 'float | None' = None, sor: 'float | None' = None, pc_swc_psi: 'float | None' = None, n_p: 'float | None' = None, lab_curve: 'Sequence[Sequence[float]] | None' = None, sigma_lab_dynes_cm: 'float | None' = None, sigma_res_dynes_cm: 'float | None' = None, phi_core: 'float | None' = None, k_core_md: 'float | None' = None, phi_res: 'float | None' = None, k_res_md: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "height_above_fwl_ft: num",
+    "delta_rho_lb_ft3: num"
+   ],
+   "optional": [
+    "method: str",
+    "swc: num?",
+    "sor: num?",
+    "pc_swc_psi: num?",
+    "n_p: num?",
+    "lab_curve: num[][]?",
+    "sigma_lab_dynes_cm: num?",
+    "sigma_res_dynes_cm: num?",
+    "phi_core: num?",
+    "k_core_md: num?",
+    "phi_res: num?",
+    "k_res_md: num?"
+   ],
+   "summary": "Water saturation at a height above the FREE WATER LEVEL. Ahmed Eq. 4-34."
+  },
+  {
+   "name": "free_water_level",
+   "group": "N",
+   "module": "tools.rockfluid",
+   "signature": "(woc_ft: 'float', delta_rho_lb_ft3: 'float', entry_pressure_psi: 'float | None' = None) -> 'Quantity | Refusal'",
+   "required": [
+    "woc_ft: num",
+    "delta_rho_lb_ft3: num"
+   ],
+   "optional": [
+    "entry_pressure_psi: num?"
+   ],
+   "summary": "FWL from the WOC and the capillary entry pressure. Ahmed Eq. 4-35."
+  },
+  {
+   "name": "curve_normalize",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(wells: 'Any' = None, curve: 'str' = '', *, reference_well: 'Any' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "wells: obj",
+    "curve: str",
+    "reference_well: obj"
+   ],
+   "summary": "Normalize a curve across a well set. Always a `Refusal`."
+  },
+  {
+   "name": "depth_shift",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(reference_depth_ft: 'Sequence[float]', reference_values: 'Sequence[Any]', target_depth_ft: 'Sequence[float]', target_values: 'Sequence[Any]', *, max_shift_ft: 'float', null_value: 'float | None' = None, curve: 'str' = '') -> 'Quantity | Refusal'",
+   "required": [
+    "reference_depth_ft: num[]",
+    "reference_values: any[]",
+    "target_depth_ft: num[]",
+    "target_values: any[]",
+    "max_shift_ft: num"
+   ],
+   "optional": [
+    "null_value: num?",
+    "curve: str"
+   ],
+   "summary": "The depth correction to apply to a target run, by cross-correlation."
+  },
+  {
+   "name": "auto_correlate",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(reference_depth_ft: 'Sequence[float]', reference_values: 'Sequence[Any]', reference_pick_ft: 'float', target_depth_ft: 'Sequence[float]', target_values: 'Sequence[Any]', *, window_ft: 'float', max_shift_ft: 'float', min_coefficient: 'float | None' = None, null_value: 'float | None' = None, curve: 'str' = '') -> 'Quantity | Refusal'",
+   "required": [
+    "reference_depth_ft: num[]",
+    "reference_values: any[]",
+    "reference_pick_ft: num",
+    "target_depth_ft: num[]",
+    "target_values: any[]",
+    "window_ft: num",
+    "max_shift_ft: num"
+   ],
+   "optional": [
+    "min_coefficient: num?",
+    "null_value: num?",
+    "curve: str"
+   ],
+   "summary": "Propose where a picked horizon lands in an offset, by curve shape."
+  },
+  {
+   "name": "isopach",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(picks: 'Sequence[Mapping[str, Any]]', *, upper_dip_deg: 'float | None' = None, lower_dip_deg: 'float | None' = None, formation: 'str' = '') -> 'Range | Refusal'",
+   "required": [
+    "picks: obj[]"
+   ],
+   "optional": [
+    "upper_dip_deg: num?",
+    "lower_dip_deg: num?",
+    "formation: str"
+   ],
+   "summary": "Formation thickness across the offset set, per well and as a band."
+  },
+  {
+   "name": "structure_map",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(picks: 'Sequence[Mapping[str, Any]]', *, target_x_ft: 'float | None' = None, target_y_ft: 'float | None' = None, formation: 'str' = '') -> 'Quantity | Refusal'",
+   "required": [
+    "picks: obj[]"
+   ],
+   "optional": [
+    "target_x_ft: num?",
+    "target_y_ft: num?",
+    "formation: str"
+   ],
+   "summary": "A subsea top surface fitted from four or more offset picks."
+  },
+  {
+   "name": "offset_consistency",
+   "group": "O",
+   "module": "tools.multiwell",
+   "signature": "(picks: 'Sequence[Mapping[str, Any]]', *, tolerance_ft: 'float | None' = None, formation: 'str' = '') -> 'Range | Refusal'",
+   "required": [
+    "picks: obj[]"
+   ],
+   "optional": [
+    "tolerance_ft: num?",
+    "formation: str"
+   ],
+   "summary": "Which offsets' picks the fitted surface cannot honor, and by how much."
+  },
+  {
+   "name": "bulk_volume_water",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(samples: 'Sequence[Mapping[str, Any]]', *, tolerance: 'float' = 0.22222222222222227, rock_class: 'str | None' = None) -> 'BulkVolumeWater | Refusal'",
+   "required": [
+    "samples: obj[]"
+   ],
+   "optional": [
+    "tolerance: num",
+    "rock_class: str?"
+   ],
+   "summary": "BVW = Sw x phi per depth, plus the Buckles constancy verdict. Asquith Eq. 7.22."
+  },
+  {
+   "name": "movable_hydrocarbon_index",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(sw: 'float | None' = None, sxo: 'float | None' = None, *, rxo: 'float | None' = None, rt: 'float | None' = None, rmf: 'float | None' = None, rw: 'float | None' = None, lithology: 'str | None' = None) -> 'MovableHydrocarbons | Refusal'",
+   "required": [],
+   "optional": [
+    "sw: num?",
+    "sxo: num?",
+    "rxo: num?",
+    "rt: num?",
+    "rmf: num?",
+    "rw: num?",
+    "lithology: str?"
+   ],
+   "summary": "MHI = Sw / Sxo, with moveable and residual oil saturation. Asquith Eqs. 7.4, 10.6, 10.7."
+  },
+  {
+   "name": "rwa_method",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(zones: 'Sequence[Mapping[str, Any]]', *, a: 'float' = 1.0, m: 'float' = 2.0) -> 'RwaScan | Refusal'",
+   "required": [
+    "zones: obj[]"
+   ],
+   "optional": [
+    "a: num",
+    "m: num"
+   ],
+   "summary": "Rwa = Rt x phi^m / a per zone, the wet pick, and Sw. Asquith Eqs. 7.16, 7.17."
+  },
+  {
+   "name": "mn_plot",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(dt: 'float', rho_b: 'float', nphi: 'float', *, dt_fl: 'float | None' = None, rho_fl: 'float' = 1.0, nphi_fl: 'float' = 1.0, metric: 'bool' = False) -> 'MNPoint'",
+   "required": [
+    "dt: num",
+    "rho_b: num",
+    "nphi: num"
+   ],
+   "optional": [
+    "dt_fl: num?",
+    "rho_fl: num",
+    "nphi_fl: num",
+    "metric: bool"
+   ],
+   "summary": "M and N from sonic, density and neutron. Asquith Eqs. 4.9 and 4.10."
+  },
+  {
+   "name": "mid_plot",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(rho_b: 'float', phi_nd: 'float', *, dt: 'float | None' = None, phi_ns: 'float | None' = None, pe: 'float | None' = None, fluid: 'str' = 'fresh', rho_fl: 'float | None' = None, dt_fl: 'float | None' = None, u_fl: 'float | None' = None) -> 'MidPoint'",
+   "required": [
+    "rho_b: num",
+    "phi_nd: num"
+   ],
+   "optional": [
+    "dt: num?",
+    "phi_ns: num?",
+    "pe: num?",
+    "fluid: str",
+    "rho_fl: num?",
+    "dt_fl: num?",
+    "u_fl: num?"
+   ],
+   "summary": "Matrix identification by apparent matrix values. Asquith Eqs. 4.11-4.13."
+  },
+  {
+   "name": "multimineral_solve",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(log_readings: 'Mapping[str, Any] | None' = None, minerals: 'Sequence[str] | None' = None, *, response_matrix: 'Mapping[str, Any] | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "log_readings: obj?",
+    "minerals: str[]?",
+    "response_matrix: obj?"
+   ],
+   "summary": "Always refuses. This corpus prints no N-mineral log-response system."
+  },
+  {
+   "name": "thomas_stieber",
+   "group": "P",
+   "module": "tools.classic",
+   "signature": "(phi_total: 'float | None' = None, vshale: 'float | None' = None, *, phi_sand: 'float | None' = None, phi_shale: 'float | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "phi_total: num?",
+    "vshale: num?",
+    "phi_sand: num?",
+    "phi_shale: num?"
+   ],
+   "summary": "Always refuses. Thomas-Stieber is in this corpus as two figures, no equations."
+  },
+  {
+   "name": "thin_bed_correction",
+   "group": "Q",
+   "module": "tools.missedpay",
+   "signature": "(rt: 'float | None' = None, rsand: 'float | None' = None, rshale: 'float | None' = None, *, vshale: 'float | None' = None, bed_thickness_ft: 'float | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "rt: num?",
+    "rsand: num?",
+    "rshale: num?",
+    "vshale: num?",
+    "bed_thickness_ft: num?"
+   ],
+   "summary": "Always refuses. No laminated sand-shale resistivity model is in this corpus."
+  },
+  {
+   "name": "low_resistivity_screen",
+   "group": "Q",
+   "module": "tools.missedpay",
+   "signature": "(samples: 'Sequence[Mapping[str, Any]]', *, sw_wet_cutoff: 'float' = 0.5, tolerance: 'float' = 0.22222222222222227, rock_class: 'str | None' = None) -> 'LowResistivityCandidates | Refusal'",
+   "required": [
+    "samples: obj[]"
+   ],
+   "optional": [
+    "sw_wet_cutoff: num",
+    "tolerance: num",
+    "rock_class: str?"
+   ],
+   "summary": "Depths that read wet but whose BVW says irreducible. Candidates, not pay."
+  },
+  {
+   "name": "rock_typing",
+   "group": "Q",
+   "module": "tools.missedpay",
+   "signature": "(samples: 'Sequence[Mapping[str, Any]] | None' = None, *, k_md: 'float | None' = None, phi: 'float | None' = None, n_groups: 'int | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "samples: obj[]?",
+    "k_md: num?",
+    "phi: num?",
+    "n_groups: int?"
+   ],
+   "summary": "Always refuses. No flow zone indicator or reservoir quality index exists here."
+  },
+  {
+   "name": "vogel_ipr",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(p_r_psig: 'float', p_b_psig: 'float', test_q_stb_d: 'float', test_p_wf_psig: 'float', steps: 'int' = 10) -> 'Quantity | Refusal'",
+   "required": [
+    "p_r_psig: num",
+    "p_b_psig: num",
+    "test_q_stb_d: num",
+    "test_p_wf_psig: num"
+   ],
+   "optional": [
+    "steps: int"
+   ],
+   "summary": "Solution-gas-drive oil IPR from one stabilized flow test. STB/day."
+  },
+  {
+   "name": "nodal_analysis",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(inflow: 'Any', tubing: 'Sequence[Sequence[float]]') -> 'Quantity | Refusal'",
+   "required": [
+    "inflow: obj",
+    "tubing: num[][]"
+   ],
+   "optional": [],
+   "summary": "Where the inflow curve crosses the tubing curve: the operating point."
+  },
+  {
+   "name": "buildup_kh_skin",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(points: 'Sequence[Sequence[float]]', t_p_hr: 'float', q_stb_d: 'float', b_o_rb_stb: 'float', mu_cp: 'float', h_ft: 'float', phi: 'float', ct_psi: 'float', rw_ft: 'float', p_wf_psi: 'float | None' = None, delta_t_min_hr: 'float | None' = None, delta_t_max_hr: 'float | None' = None, storage: 'dict[str, float] | None' = None, test_type: 'str' = 'buildup') -> 'dict[str, Quantity | Refusal] | Refusal'",
+   "required": [
+    "points: num[][]",
+    "t_p_hr: num",
+    "q_stb_d: num",
+    "b_o_rb_stb: num",
+    "mu_cp: num",
+    "h_ft: num",
+    "phi: num",
+    "ct_psi: num",
+    "rw_ft: num"
+   ],
+   "optional": [
+    "p_wf_psi: num?",
+    "delta_t_min_hr: num?",
+    "delta_t_max_hr: num?",
+    "storage: num?",
+    "test_type: str"
+   ],
+   "summary": "kh, k, skin and radius of investigation off one Horner straight line."
+  },
+  {
+   "name": "chan_diagnostic",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(points: 'Sequence[Sequence[float]] | None' = None, oil_rate_stb_d: 'float | None' = None, water_rate_stb_d: 'float | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "points: num[][]?",
+    "oil_rate_stb_d: num?",
+    "water_rate_stb_d: num?"
+   ],
+   "summary": "Always refuses. The WOR-derivative diagnostic is not in this corpus."
+  },
+  {
+   "name": "wor_xplot",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(points: 'Sequence[Sequence[float]]', wor_limit: 'float | None' = None) -> 'dict[str, Quantity] | Refusal'",
+   "required": [
+    "points: num[][]"
+   ],
+   "optional": [
+    "wor_limit: num?"
+   ],
+   "summary": "WOR against cumulative oil: the water forecast and the remaining oil."
+  },
+  {
+   "name": "material_balance",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(history: 'Sequence[Mapping[str, float]] | None' = None, b_oi_rb_stb: 'float | None' = None, r_si_scf_stb: 'float | None' = None, drive: 'str' = 'depletion') -> 'Quantity | Refusal'",
+   "required": [],
+   "optional": [
+    "history: obj?",
+    "b_oi_rb_stb: num?",
+    "r_si_scf_stb: num?",
+    "drive: str"
+   ],
+   "summary": "Original oil in place from the Havlena-Odeh straight line. STB."
+  },
+  {
+   "name": "artificial_lift_screen",
+   "group": "R",
+   "module": "tools.welltest",
+   "signature": "(q_liquid_bbl_d: 'float | None' = None, depth_ft: 'float | None' = None, glr_scf_bbl: 'float | None' = None, deviation_deg: 'float | None' = None) -> 'Refusal'",
+   "required": [],
+   "optional": [
+    "q_liquid_bbl_d: num?",
+    "depth_ft: num?",
+    "glr_scf_bbl: num?",
+    "deviation_deg: num?"
+   ],
+   "summary": "Always refuses. The corpus states no selection criteria to screen on."
+  }
+ ]
+}

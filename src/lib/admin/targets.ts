@@ -62,6 +62,15 @@ function texasCounties(): Promise<CountyFeature[]> {
   return countyFeatures;
 }
 
+/** The operator numbers on the list, without their live figures. */
+export async function getTargetNumbers(): Promise<Set<number>> {
+  if (!hasSupabase()) return new Set();
+  const sb = await getSupabaseServer();
+  const { data, error } = await sb.from("admin_targets").select("operator_no");
+  if (error) throw new Error(`getTargetNumbers: ${error.message}`);
+  return new Set(((data ?? []) as { operator_no: number }[]).map((r) => r.operator_no));
+}
+
 /** Every target, newest first, with its live figures. */
 export async function getTargets(prices: CommodityPrices): Promise<TargetRow[]> {
   if (!hasSupabase()) return [];

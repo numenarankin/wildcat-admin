@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { BrandMark } from "@/components/brand-mark";
 import { CheckIcon, PaperclipIcon, XIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -578,13 +578,7 @@ function MessageBubble({ message, mine }: { message: SupportMessage; mine: boole
       {attachments && <div className="pl-7">{attachments}</div>}
       <div className="flex w-full items-center gap-2">
         {fromStaff ? (
-          <Image
-            src="/slim_normal.png"
-            alt="Wildcat"
-            width={20}
-            height={20}
-            className="size-5 shrink-0 object-contain dark:invert"
-          />
+          <BrandMark alt="Wildcat" size={20} className="size-5" />
         ) : (
           <span aria-hidden className="size-5 shrink-0" />
         )}

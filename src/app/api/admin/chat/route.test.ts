@@ -34,6 +34,14 @@ vi.mock("@/lib/ai/admin/tools", () => ({
     ),
 }));
 
+// The prospecting catalog reaches the RRC mirror and Supabase; its shape is what matters here.
+vi.mock("@/lib/ai/admin/prospecting-tools", () => ({
+  prospectingTools: () => ({
+    list_targets: { description: "targets", execute: async () => (await import("@/lib/admin/google/orion-guard")).inOrionCall() },
+    add_targets: { description: "add", needsApproval: true, execute: async () => (await import("@/lib/admin/google/orion-guard")).inOrionCall() },
+  }),
+}));
+
 // The caller's Google connection; none unless a test connects one.
 const googleSettings = vi.fn(async (): Promise<unknown> => null);
 vi.mock("@/lib/admin/google/settings", () => ({ getGoogleSettings: () => googleSettings() }));
@@ -67,7 +75,7 @@ describe("POST /api/admin/chat", () => {
     expect(res.status).toBe(200);
     expect(streamText).toHaveBeenCalledTimes(1);
     const call = (streamText.mock.calls[0] as unknown[])[0] as { tools: Record<string, unknown>; system: string; model: { id: string } };
-    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "business_metrics", "draft_email", "list_customers", "platform_admins", "support_inbox"]);
+    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "add_targets", "business_metrics", "draft_email", "list_customers", "list_targets", "platform_admins", "support_inbox"]);
     for (const customerTool of ["get_wells", "search_documents", "create_task", "rrc_search"]) {
       expect(call.tools).not.toHaveProperty(customerTool);
     }

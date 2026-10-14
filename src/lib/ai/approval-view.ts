@@ -87,12 +87,14 @@ export const ACTION_TITLES: Record<string, string> = {
   update_transaction: "Update a ledger entry",
   create_document: "Create a document",
   edit_document: "Edit a document",
+  enrich_target: "Research a target (website, decision-makers, contacts)",
+  add_to_sequence: "Add a target to the sequence (calls to the P-5 phone)",
 };
 
 /** Batch writes: the array field, plus the verb + singular noun for the title. */
 export const BATCH_ACTIONS: Record<
   string,
-  { key: string; verb: string; noun: string }
+  { key: string; verb: string; noun: string; plural?: string }
 > = {
   record_production: {
     key: "readings",
@@ -108,6 +110,18 @@ export const BATCH_ACTIONS: Record<
     key: "readings",
     verb: "Record",
     noun: "disposal reading",
+  },
+  add_targets: { key: "operators", verb: "Add", noun: "target" },
+  queue_for_enrichment: {
+    key: "operators",
+    verb: "Queue",
+    noun: "target for enrichment",
+    plural: "targets for enrichment",
+  },
+  add_to_sequence: {
+    key: "contacts",
+    verb: "Add to the sequence",
+    noun: "contact",
   },
 };
 
@@ -160,6 +174,7 @@ const LABELS: Record<string, string> = {
   unitCost: "Unit cost",
   wellIds: "Wells",
   content: "Content",
+  operatorNo: "Operator #",
 };
 
 /** Money-valued keys get a $ and thousands separators. */
@@ -188,7 +203,7 @@ function isHiddenKey(key: string): boolean {
 }
 
 function isEmpty(v: unknown): boolean {
-  return v == null || v === "";
+  return v == null || v === "" || (Array.isArray(v) && v.length === 0);
 }
 
 export function humanizeKey(key: string): string {
@@ -291,7 +306,7 @@ export function describeApproval(name: string, input: unknown): ApprovalView {
     const items = batchVal as Record<string, unknown>[];
     const n = items.length;
     return {
-      title: `${batch.verb} ${n} ${batch.noun}${n === 1 ? "" : "s"}`,
+      title: `${batch.verb} ${n} ${n === 1 ? batch.noun : (batch.plural ?? `${batch.noun}s`)}`,
       fields: scalarFields(obj, new Set([batch.key])),
       table: buildTable(items),
     };

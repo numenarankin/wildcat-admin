@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { BrandMark } from "@/components/brand-mark";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -98,7 +98,7 @@ export function AppSidebar() {
 			variant="sidebar"
 		>
 			<SidebarHeader className="h-14 justify-center border-b px-2">
-				<SidebarMenuButton render={<a href="#link" />}><Image src="/slim_normal.png" alt="WildcatIQ logo" width={16} height={16} className="size-4 shrink-0" /><span className="text-base font-semibold text-foreground!">WildcatIQ</span></SidebarMenuButton>
+				<SidebarMenuButton render={<a href="#link" />}><BrandMark size={16} className="size-4" /><span className="text-base font-semibold text-foreground!">WildcatIQ</span></SidebarMenuButton>
 			</SidebarHeader>
 			<SidebarContent>
 				{groups.map((group, index) => (

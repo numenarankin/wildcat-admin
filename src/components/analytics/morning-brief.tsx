@@ -173,7 +173,11 @@ export function MorningBrief({ className }: { className?: string } = {}) {
           signal: controller.signal,
         });
         console.log("[dashboard-brief] response", res.status, res.ok);
-        if (!res.ok || !res.body) {
+        // Only the route's own plain-text stream is a brief. Anything else
+        // (an HTML 404 page, a JSON error) would be streamed onto the
+        // dashboard as text, so it flips to the fallback heading instead.
+        const isText = (res.headers.get("content-type") ?? "").startsWith("text/plain");
+        if (!res.ok || !res.body || !isText) {
           setFailed(true);
           return;
         }

@@ -25,7 +25,7 @@ import type { EmailIndex } from "@/lib/admin/google/gmail/suggest";
 import type { EmailSettings } from "@/lib/admin/google/gmail/email-style";
 import type { EmailDraftDirective } from "@/lib/admin/google/gmail/draft-spec";
 import { draftOutreachEmail } from "@/lib/admin/outreach/draft";
-import { cancelScheduledEmail, recordStep, scheduleEmail, stopEnrollment } from "@/lib/admin/outreach/sequence-actions";
+import { cancelScheduledEmail, deleteEnrollment, recordStep, scheduleEmail, stopEnrollment } from "@/lib/admin/outreach/sequence-actions";
 import type { ScheduledEmail } from "@/lib/admin/outreach/settings";
 import {
   DEFAULT_SEQUENCE_STEPS,
@@ -142,6 +142,18 @@ export function SequenceWorkspace({
     });
   }
 
+  function remove(e: Enrollment) {
+    startTransition(async () => {
+      try {
+        await deleteEnrollment(e.id);
+      } catch (error) {
+        console.error("Failed to delete the enrollment", error);
+        toast.error("Couldn't delete it.");
+      }
+      onChanged();
+    });
+  }
+
   const cards: CardSpec[] = compose
     ? [
         {
@@ -215,7 +227,7 @@ export function SequenceWorkspace({
               const overdue = e.state === "active" && e.nextDueOn != null && e.nextDueOn < today;
               const dueToday = e.state === "active" && e.nextDueOn === today;
               return (
-                <TableRow key={e.id} className={cn(ACCOUNTING_ROW_CLASS, e.state !== "active" && "text-muted-foreground")}>
+                <TableRow key={e.id} className={cn(ACCOUNTING_ROW_CLASS, "group/row", e.state !== "active" && "text-muted-foreground")}>
                   <TableCell className="font-medium">{e.companyName}</TableCell>
                   <TableCell>
                     {e.contact ? (
@@ -239,8 +251,9 @@ export function SequenceWorkspace({
                     {e.lastEvent ? `${OUTCOME_LABEL[e.lastEvent.outcome] ?? e.lastEvent.outcome} · ${day.format(new Date(e.lastEvent.happenedAt))}` : "—"}
                   </TableCell>
                   <TableCell>
-                    {e.state === "active" && (
-                      <div className="flex items-center justify-end gap-1">
+                    <div className="flex items-center justify-end gap-1">
+                      {e.state === "active" && (
+                        <>
                         {step.action === "email" ? (
                           <Button size="xs" onClick={() => handleDraft(e)} disabled={drafting === e.id || !e.contact?.email}>
                             {drafting === e.id && <Loader2Icon className="animate-spin" />}
@@ -268,8 +281,17 @@ export function SequenceWorkspace({
                             <DropdownMenuItem variant="destructive" onClick={() => stop(e)}>Stop sequence</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </div>
-                    )}
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        aria-label={`Delete ${e.companyName} from the sequence`}
+                        onClick={() => remove(e)}
+                        className="flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 hover:bg-accent hover:text-destructive group-hover/row:opacity-100 focus-visible:opacity-100"
+                      >
+                        <XIcon className="size-3.5" />
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );

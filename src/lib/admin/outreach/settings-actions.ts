@@ -24,6 +24,6 @@ export async function saveProspectingSettings(
     .from("admin_prospecting_settings")
     .upsert({ user_id: user.id, template, schedules }, { onConflict: "user_id" });
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/prospecting");
+  for (const p of ["/prospecting", "/outbound"]) revalidatePath(p);
   return { ok: true };
 }

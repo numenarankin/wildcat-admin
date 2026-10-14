@@ -93,8 +93,10 @@ export function describePage(pathname: string): string {
       return "the admin Dashboard (ARR, growth, revenue by customer, customers table)";
     case "clients":
       return "the Clients page (every customer org)";
-    case "sales":
-      return "the Sales desk (prospects, pipeline, sales tasks)";
+    case "prospecting":
+      return "the Prospecting page (Recon operator map, targets, enrich queue, outreach sequence)";
+    case "outbound":
+      return "the Outbound page (Queue tab: the outreach sequence, what is due today)";
     case "support":
       return "the Support desk (customer support threads)";
     case "email":

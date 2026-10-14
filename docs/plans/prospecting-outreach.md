@@ -153,6 +153,9 @@ All admin-side, policy `is_platform_admin()`, migrations in
 ## 6. Guardrails
 
 - Orion has no send capability anywhere in this flow. Drafting is the ceiling.
+- Every Orion write on this page (add target, queue, enrich, enroll) is an
+  approval card the user clicks; the Enrich chat's own tools still cannot
+  enroll.
 - Every contact detail carries its source; nothing is shown as fact without
   one. Guessed emails are labelled guessed until verified.
 - Scraping is polite: `robots.txt` respected, one request at a time per site,
@@ -170,8 +173,19 @@ All admin-side, policy `is_platform_admin()`, migrations in
   Email Verifier). Not optimizing for price; the universe is small.
 - Generic addresses (info@, office@) are kept and shown as generic, and are
   never picked as a sequence contact by default.
-- The queue is fed by hand from Targets rows; new targets are not queued
-  automatically. Enrichment runs only through the chat workflow.
+- New targets are not queued automatically. The queue is fed from Targets
+  rows, by the user's button or by the admin Orion's `queue_for_enrichment`
+  tool after the user approves its card.
+- Enrichment runs through the Enrich chat, or headless from the admin Orion's
+  `enrich_target` tool (`lib/ai/admin/enrich-run.ts`: same persona, card and
+  catalog, one `generateText` pass, one target per approved call).
+- The admin Orion (`lib/ai/admin/prospecting-tools.ts`, 2026-10-14) reads
+  every tab (targets with projected subscription figures, queue, cards,
+  enrollments, scheduled emails, settings; RRC operator search and profile)
+  and has four actions behind approval cards: `add_targets`,
+  `queue_for_enrichment`, `enrich_target`, `add_to_sequence`. It still cannot
+  draft, record a step, schedule or send; `prospecting-tools.test.ts` pins
+  the catalog.
 
 ## Keys and infrastructure (needed to run, not to build)
 

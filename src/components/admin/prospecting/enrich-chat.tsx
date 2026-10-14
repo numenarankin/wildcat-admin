@@ -9,6 +9,9 @@ import { saveAdminMessages } from "@/lib/ai/admin/conversation-actions";
 import { loadEnrichConversation } from "@/lib/admin/outreach/enrich-chat-actions";
 import { NEW_CHAT_TITLE, type Conversation } from "@/lib/ai/conversations";
 
+/** The one-click opener: the prompt that runs the persona's four steps. */
+const ENRICH_QUICK_ACTION = { label: "Enrich", text: "Tell me about this company." };
+
 /**
  * One company's Enrich chat: the Orion chat surface posted to the Enrich
  * route with the target in the body, saved to the admin history tagged with
@@ -84,6 +87,8 @@ export function EnrichChat({
       firstName={firstName}
       api="/api/admin/enrich/chat"
       extraBody={extraBody}
+      noAttachments
+      quickAction={ENRICH_QUICK_ACTION}
     />
   );
 }

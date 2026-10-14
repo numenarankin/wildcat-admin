@@ -11,7 +11,6 @@ import { MAX_LIST_ROWS, SLICE_PRIORITY, type ContextSlice } from "@/lib/ai/page-
 import { buildRowListSlice } from "@/lib/ai/context-slices";
 import type { CustomerRow } from "@/lib/admin/customer-rows";
 import type { CustomerBillingData, CustomerPanelData } from "@/lib/admin/customer-panel-types";
-import type { Prospect } from "@/lib/admin/prospect-types";
 import type { StaffSupportThread } from "@/lib/support/types";
 import type { LogLine } from "@/lib/admin/log-rows";
 import type { LogParams } from "@/lib/admin/log-params";
@@ -136,51 +135,6 @@ export function customerPanelSlice(input: {
       `"This customer" means org ${input.orgId}.`,
       ...input.facts,
     ],
-  };
-}
-
-// ---------------------------------------------------------------- sales
-
-const STAGE_LABEL: Record<string, string> = {
-  queue: "Queue",
-  reached_out: "Reached Out",
-  meeting_booked: "Meeting Booked",
-  trial: "Trial",
-  won: "Won",
-  lost: "Lost",
-};
-
-function prospectLine(p: Prospect): string {
-  const bits = [
-    STAGE_LABEL[p.stage] ?? p.stage,
-    p.contactName,
-    p.email,
-    p.county && `${p.county} County`,
-    p.wells != null && `${p.wells} wells`,
-    p.source && `source ${p.source}`,
-  ].filter(Boolean);
-  return `${p.company} (prospect ${p.id}): ${bits.join(", ")}`;
-}
-
-/** Prospects, in the stage order the pipeline shows. */
-export function prospectsSlice(prospects: readonly Prospect[]): ContextSlice | null {
-  const counts = Object.keys(STAGE_LABEL)
-    .map((s) => `${STAGE_LABEL[s]} ${prospects.filter((p) => p.stage === s).length}`)
-    .join(", ");
-  return buildRowListSlice({
-    label: "Prospects",
-    total: prospects.length,
-    query: [`By stage: ${counts}.`],
-    rows: prospects.map(prospectLine),
-  });
-}
-
-/** A prospect open in its modal. */
-export function prospectModalSlice(p: Prospect): ContextSlice {
-  return {
-    priority: SLICE_PRIORITY.modal,
-    label: `Open: prospect ${p.company} (prospect ${p.id})`,
-    lines: [prospectLine(p), ...(p.notes ? [`Notes: ${quote(p.notes, 400)}`] : [])],
   };
 }
 

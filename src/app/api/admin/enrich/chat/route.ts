@@ -55,7 +55,15 @@ export async function POST(req: Request): Promise<Response> {
   const profile = await getOperatorProfile(targetNo).catch(() => null);
 
   const system = buildEnrichSystemPrompt(
-    { target, p5: profile?.operator ?? null, officers: profile?.officers ?? [], research, contacts },
+    {
+      target,
+      p5: profile?.operator ?? null,
+      officers: profile?.officers ?? [],
+      last12: profile?.last12 ?? null,
+      leaseCount: profile?.leaseCount ?? null,
+      research,
+      contacts,
+    },
     new Date()
   );
   const tools = enrichTools(targetNo);

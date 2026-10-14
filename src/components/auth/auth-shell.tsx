@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { BrandMark } from "@/components/brand-mark";
 import { AnimatePresence } from "framer-motion";
 import { Particles } from "@/components/ui/particles";
 import { SwipeUp } from "@/components/ui/swipe-up";
@@ -59,13 +59,7 @@ export function AuthShell({
             {banner}
             {brand && (
               <div className="flex items-center gap-2.5">
-                <Image
-                  src="/slim_normal.png"
-                  alt="WildcatIQ logo"
-                  width={32}
-                  height={32}
-                  className="size-8"
-                />
+                <BrandMark size={32} className="size-8" />
                 <span className="text-3xl font-bold tracking-tight text-foreground">
                   WildcatIQ
                 </span>

@@ -7,8 +7,8 @@ import {
 } from "@/lib/admin/task-actions";
 
 /**
- * The writes behind every admin task board (/admin/tasks and the Tasks tab of
- * /admin/sales show the SAME `admin_tasks` rows). Client-importable: the
+ * The writes behind the admin task board (/tasks over `admin_tasks`).
+ * Client-importable: the
  * actions are server actions. The columns are `ADMIN_TASK_COLUMNS` in
  * `@/lib/tasks/tasks`, beside the customer list they extend.
  */

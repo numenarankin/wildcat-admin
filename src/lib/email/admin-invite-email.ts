@@ -1,6 +1,5 @@
 import "server-only";
 
-import { getAppUrl } from "@/lib/env";
 import { sendBrevoEmail, type BuiltEmail } from "@/lib/email/brevo";
 
 /**
@@ -22,9 +21,12 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-/** Absolute invite URL for a raw token, built from the configured app URL. */
-export function inviteUrl(token: string, appUrl: string = getAppUrl()): string {
-  return `${appUrl.replace(/\/$/, "")}/invite/${token}`;
+/** The deployed admin origin. Hardcoded on purpose: env-driven URLs sent invites to localhost. */
+const ADMIN_ORIGIN = "https://admin-suite-tan.vercel.app";
+
+/** Absolute invite URL for a raw token on the deployed admin origin. */
+export function inviteUrl(token: string): string {
+  return `${ADMIN_ORIGIN}/invite/${token}`;
 }
 
 export interface AdminInviteInput {

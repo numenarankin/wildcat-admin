@@ -123,6 +123,13 @@ interface OrionChatProps {
    */
   folderId?: string;
   projectName?: string;
+  /** Hide the knowledge-base and disk attachment buttons (a chat with nothing to attach). */
+  noAttachments?: boolean;
+  /**
+   * A one-click opener: with nothing typed (and Orion idle), the send circle
+   * becomes a pill with this label that sends `text` as the user's message.
+   */
+  quickAction?: { label: string; text: string };
   /**
    * Where a turn is posted. The admin side points this at its own route,
    * which hands the model a different catalog; nothing else about the
@@ -150,6 +157,8 @@ export function OrionChat({
   projectName,
   api = "/api/chat",
   extraBody,
+  noAttachments = false,
+  quickAction,
 }: OrionChatProps) {
   const transport = useMemo(
     () =>
@@ -498,9 +507,39 @@ export function OrionChat({
       >
         <SquareIcon className="size-4 fill-current" />
       </SendButton>
+    ) : quickAction && !hasDraft && !isBusy ? (
+      <Button
+        type="button"
+        onClick={() => void sendMessage({ text: quickAction.text })}
+        className="h-10 shrink-0 rounded-full px-4"
+      >
+        {quickAction.label}
+      </Button>
     ) : (
       <SendButton onClick={handleSend} disabled={!canSend} />
     );
+  const attachButtons = noAttachments ? null : (
+    <>
+      <Button
+        type="button"
+        size="icon-sm"
+        variant="ghost"
+        aria-label="Attach from knowledge base"
+        onClick={() => setKbOpen(true)}
+      >
+        <PlusIcon />
+      </Button>
+      <Button
+        type="button"
+        size="icon-sm"
+        variant="ghost"
+        aria-label="Upload from disk"
+        onClick={() => diskInputRef.current?.click()}
+      >
+        <PaperclipIcon />
+      </Button>
+    </>
+  );
 
   // Home-style composer used on the new-chat (empty) screen: a centered box
   // with the controls in a row beneath the textarea — the Orion landing IS
@@ -555,24 +594,7 @@ export function OrionChat({
           className={COMPOSER_TEXTAREA}
         />
         <div className="flex items-center gap-0.5">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Attach from knowledge base"
-            onClick={() => setKbOpen(true)}
-          >
-            <PlusIcon />
-          </Button>
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label="Upload from disk"
-            onClick={() => diskInputRef.current?.click()}
-          >
-            <PaperclipIcon />
-          </Button>
+          {attachButtons}
           {sendControl}
         </div>
       </div>
@@ -778,24 +800,7 @@ export function OrionChat({
               className={COMPOSER_TEXTAREA}
             />
             <div className="flex items-center gap-0.5">
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                aria-label="Attach from knowledge base"
-                onClick={() => setKbOpen(true)}
-              >
-                <PlusIcon />
-              </Button>
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                aria-label="Upload from disk"
-                onClick={() => diskInputRef.current?.click()}
-              >
-                <PaperclipIcon />
-              </Button>
+              {attachButtons}
               {sendControl}
             </div>
           </div>

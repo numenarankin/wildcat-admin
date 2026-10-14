@@ -4,7 +4,7 @@ The Wildcat insiders' console, split out of the customer app (`wildcat`) where i
 lived at `/admin/*`. Same pages, same Orion, same database: it uses the customer
 app's Supabase project, so every read and write lands in the same tables.
 
-- Pages that were `/admin/<x>` are now `/<x>` (e.g. `/admin/sales` is `/sales`).
+- Pages that were `/admin/<x>` are now `/<x>` (e.g. `/admin/tasks` is `/tasks`).
 - API routes keep their paths (`/api/admin/*`), so the Google and Slack OAuth
   callbacks are `<this app's origin>/api/admin/{google,slack}/callback`.
 - Only accounts on `platform_admins` get in. Anyone else signed in sees a 404.

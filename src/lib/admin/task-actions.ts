@@ -11,8 +11,7 @@ import type { TaskStatus } from "@/lib/tasks/tasks";
  * takes them as its `actions` prop. Request-scoped client, admin-only policy.
  */
 
-// Both boards over `admin_tasks`.
-const TASK_PATHS = ["/tasks", "/sales"];
+const TASK_PATHS = ["/tasks"];
 function revalidateAdminTasks(): void {
   for (const path of TASK_PATHS) revalidatePath(path);
   revalidatePath("/projects", "layout");

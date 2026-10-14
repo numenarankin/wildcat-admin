@@ -11,6 +11,7 @@ import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { adminTools } from "@/lib/ai/admin/tools";
 import { googleTools } from "@/lib/ai/admin/google-tools";
 import { draftTools } from "@/lib/ai/admin/draft-tools";
+import { prospectingTools } from "@/lib/ai/admin/prospecting-tools";
 import { runAsOrion } from "@/lib/admin/google/orion-guard";
 import { getGoogleSettings } from "@/lib/admin/google/settings";
 import { buildAdminSystemPrompt } from "@/lib/ai/admin/system-prompt";
@@ -20,7 +21,9 @@ import { SMOOTH_DELAY_MS, smoothChunk } from "@/lib/ai/stream-chunking";
 import { appendToUserTurn, pageContextNote } from "@/lib/ai/admin/page-context-note";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+// An approved enrich_target runs a whole research pass inside one turn
+// (`enrich-run.ts`), the same budget the Enrich chat's route has.
+export const maxDuration = 300;
 
 const MODEL = "claude-opus-5";
 const MAX_STEPS = 10;
@@ -80,7 +83,7 @@ export async function POST(req: Request): Promise<Response> {
     model: anthropic(MODEL),
     system,
     messages: modelMessages,
-    tools: asOrion({ ...adminTools(), ...googleTools(connected), ...draftTools() }),
+    tools: asOrion({ ...adminTools(), ...googleTools(connected), ...draftTools(), ...prospectingTools() }),
     // Business questions are a tool call and a sentence; the thinking phase
     // is what costs the wall clock here (see CLAUDE.md on Opus 5 effort).
     providerOptions: { anthropic: { effort: "medium", cacheControl: { type: "ephemeral" } } },

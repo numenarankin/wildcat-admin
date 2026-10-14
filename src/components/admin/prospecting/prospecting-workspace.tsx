@@ -19,6 +19,7 @@ import { EnrichWorkspace } from "@/components/admin/prospecting/enrich-workspace
 import { SequenceWorkspace } from "@/components/admin/prospecting/sequence-workspace";
 import { ProspectingSettingsSheet } from "@/components/admin/prospecting/prospecting-settings-sheet";
 import { queueTarget } from "@/lib/admin/outreach/research-actions";
+import { clearEnrollments } from "@/lib/admin/outreach/sequence-actions";
 import type { ScheduledEmail } from "@/lib/admin/outreach/settings";
 import { todayInAdminZone, type EnrichQueueItem, type Enrollment, type ProspectingSettings } from "@/lib/admin/outreach/types";
 import type { EmailIndex } from "@/lib/admin/google/gmail/suggest";
@@ -238,11 +239,28 @@ export function ProspectingWorkspace({
     </>
   );
 
+  const handleClearSequence = useCallback(() => {
+    startTransition(async () => {
+      try {
+        await clearEnrollments();
+      } catch (error) {
+        console.error("Failed to clear the sequence", error);
+        toast.error("Couldn't clear the sequence.");
+      }
+      router.refresh();
+    });
+  }, [router]);
+
   const sequenceActions = (
     <>
       <span className="text-sm tabular-nums text-muted-foreground">
         <span className="font-medium text-foreground">{dueToday}</span> due today
       </span>
+      {enrollments.length > 0 && (
+        <Button size="sm" variant="outline" className="h-9 text-muted-foreground hover:text-destructive" onClick={handleClearSequence}>
+          Clear
+        </Button>
+      )}
       <Button size="sm" variant="outline" className="h-9" onClick={() => setSettingsOpen(true)}>
         <SettingsIcon />
         Settings

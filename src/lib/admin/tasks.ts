@@ -4,7 +4,7 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 import type { Task, TaskPriority, TaskStatus } from "@/lib/tasks/tasks";
 
 /**
- * The admin team's tasks (`admin_tasks`), for the Tasks tab of /admin/sales.
+ * The admin team's tasks (`admin_tasks`), for /tasks.
  *
  * Same `Task` shape as the customer board so `TasksBoard` renders both; the
  * rows live in their own table because they are Wildcat's, not any org's

@@ -5,12 +5,10 @@ import {
   customersTableSlice,
   emailListSlice,
   logsSlice,
-  prospectsSlice,
   quote,
   tasksBoardSlice,
 } from "@/lib/ai/admin/page-slices";
 import type { CustomerRow } from "@/lib/admin/customer-rows";
-import type { Prospect } from "@/lib/admin/prospect-types";
 import type { GmailThreadSummary } from "@/lib/admin/google/gmail/types";
 import type { LogLine } from "@/lib/admin/log-rows";
 import type { Task } from "@/lib/tasks/tasks";
@@ -53,32 +51,6 @@ describe("customersTableSlice", () => {
 
   it("says nothing for an empty table", () => {
     expect(customersTableSlice([], "Revenue /yr, descending")).toBeNull();
-  });
-});
-
-describe("prospectsSlice", () => {
-  const p = (id: string, stage: Prospect["stage"], extra: Partial<Prospect> = {}): Prospect => ({
-    id,
-    company: `Co ${id}`,
-    stage,
-    stageChangedAt: "2026-10-01T00:00:00Z",
-    createdAt: "2026-09-01T00:00:00Z",
-    ...extra,
-  });
-
-  it("counts every stage, zeros included, then lists rows with ids", () => {
-    const slice = prospectsSlice([
-      p("a", "queue", { contactName: "Ann", county: "Reeves", wells: 12 }),
-      p("b", "trial"),
-      p("c", "queue"),
-    ]);
-    expect(slice?.lines).toEqual([
-      "3 rows.",
-      "By stage: Queue 2, Reached Out 0, Meeting Booked 0, Trial 1, Won 0, Lost 0.",
-      "- Co a (prospect a): Queue, Ann, Reeves County, 12 wells",
-      "- Co b (prospect b): Trial",
-      "- Co c (prospect c): Queue",
-    ]);
   });
 });
 

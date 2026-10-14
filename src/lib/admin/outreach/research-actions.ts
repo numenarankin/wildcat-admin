@@ -45,6 +45,15 @@ export async function dequeueTarget(operatorNo: number): Promise<void> {
   revalidatePath(PATH);
 }
 
+/** Empty the Enrich queue: every target's research row goes, whatever its status. */
+export async function clearQueue(): Promise<void> {
+  await requireAdmin();
+  const sb = await getSupabaseServer();
+  const { error } = await sb.from("admin_target_research").delete().gte("operator_no", 0);
+  if (error) throw new Error(`clearQueue: ${error.message}`);
+  revalidatePath(PATH);
+}
+
 export async function setResearchStatus(operatorNo: number, status: EnrichStatus): Promise<void> {
   await requireAdmin();
   const sb = await getSupabaseServer();

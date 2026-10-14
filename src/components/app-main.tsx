@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 /**
  * Main content wrapper. Most routes get a padded, full-width container whose
  * left edge lines up with the header (and its breadcrumb). Full-bleed routes
- * (a project workspace, Orion, Support, Sales, Prospecting, Calendar, Email) fill the entire area
+ * (a project workspace, Orion, Support, Prospecting, Outbound, Calendar, Email) fill the entire area
  * flush to the sidebar, top bar, and screen edges.
  */
 export function AppMain({ children }: { children: React.ReactNode }) {
@@ -15,8 +15,8 @@ export function AppMain({ children }: { children: React.ReactNode }) {
     /^\/projects\/[^/]+/.test(pathname) ||
     pathname === "/orion" ||
     pathname === "/support" ||
-    pathname === "/sales" ||
     pathname === "/prospecting" ||
+    pathname === "/outbound" ||
     pathname === "/calendar" ||
     pathname === "/email";
 

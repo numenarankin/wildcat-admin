@@ -23,7 +23,9 @@ import { getProspectingSettings } from "@/lib/admin/outreach/settings";
  * tool that reaches any of these.
  */
 
-const PATH = "/prospecting";
+// The Sequence tab on /prospecting and the Queue tab on /outbound show the same rows.
+const PATHS = ["/prospecting", "/outbound"];
+const revalidate = () => PATHS.forEach((p) => revalidatePath(p));
 
 async function requireAdmin() {
   if (!(await isPlatformAdmin())) throw new Error("Platform admin required.");
@@ -65,7 +67,7 @@ export async function enrollTarget(operatorNo: number, contactIds: string[]): Pr
   }
   // The research card reads "enrolled" from here on.
   await sb.from("admin_target_research").update({ status: "enrolled" }).eq("operator_no", operatorNo);
-  revalidatePath(PATH);
+  revalidate();
   return { enrolled: rows.length };
 }
 
@@ -108,7 +110,7 @@ export async function recordStep(
   }
   const { error } = await sb.from("admin_sequence_enrollments").update(patch).eq("id", enrollmentId);
   if (error) throw new Error(`recordStep (advance): ${error.message}`);
-  revalidatePath(PATH);
+  revalidate();
 }
 
 export async function stopEnrollment(enrollmentId: string): Promise<void> {
@@ -119,7 +121,54 @@ export async function stopEnrollment(enrollmentId: string): Promise<void> {
     .update({ state: "stopped", next_due_on: null })
     .eq("id", enrollmentId);
   if (error) throw new Error(`stopEnrollment: ${error.message}`);
-  revalidatePath(PATH);
+  revalidate();
+}
+
+/**
+ * Once a target has no enrollment left, its research card stops reading
+ * "enrolled": back to reviewed, the status it had when the user enrolled it.
+ */
+async function unmarkEnrolled(sb: Awaited<ReturnType<typeof getSupabaseServer>>, operatorNos: number[]) {
+  if (operatorNos.length === 0) return;
+  const { data } = await sb.from("admin_sequence_enrollments").select("operator_no").in("operator_no", operatorNos);
+  const still = new Set((data ?? []).map((r) => r.operator_no as number));
+  const bare = operatorNos.filter((n) => !still.has(n));
+  if (bare.length === 0) return;
+  await sb.from("admin_target_research").update({ status: "reviewed" }).in("operator_no", bare).eq("status", "enrolled");
+}
+
+/**
+ * Delete an enrollment outright: its events go with it, and any email still
+ * queued for it is canceled so the cron never sends for a row that is gone.
+ */
+export async function deleteEnrollment(enrollmentId: string): Promise<void> {
+  await requireAdmin();
+  const sb = await getSupabaseServer();
+  const { data: row, error: readErr } = await sb
+    .from("admin_sequence_enrollments")
+    .select("operator_no")
+    .eq("id", enrollmentId)
+    .maybeSingle<{ operator_no: number }>();
+  if (readErr) throw new Error(`deleteEnrollment (read): ${readErr.message}`);
+  if (!row) return;
+  await sb.from("admin_scheduled_emails").update({ status: "canceled" }).eq("enrollment_id", enrollmentId).eq("status", "pending");
+  const { error } = await sb.from("admin_sequence_enrollments").delete().eq("id", enrollmentId);
+  if (error) throw new Error(`deleteEnrollment: ${error.message}`);
+  await unmarkEnrolled(sb, [row.operator_no]);
+  revalidate();
+}
+
+/** Empty the Sequence tab: every enrollment, its events and its pending emails. */
+export async function clearEnrollments(): Promise<void> {
+  await requireAdmin();
+  const sb = await getSupabaseServer();
+  const { data: rows, error: readErr } = await sb.from("admin_sequence_enrollments").select("operator_no");
+  if (readErr) throw new Error(`clearEnrollments (read): ${readErr.message}`);
+  await sb.from("admin_scheduled_emails").update({ status: "canceled" }).not("enrollment_id", "is", null).eq("status", "pending");
+  const { error } = await sb.from("admin_sequence_enrollments").delete().gte("step_index", 0);
+  if (error) throw new Error(`clearEnrollments: ${error.message}`);
+  await unmarkEnrolled(sb, [...new Set((rows ?? []).map((r) => r.operator_no as number))]);
+  revalidate();
 }
 
 export interface ScheduleEmailInput {
@@ -178,7 +227,7 @@ export async function scheduleEmail(input: ScheduleEmailInput): Promise<{ id: st
     // when the cron sends it.
     await recordStep(input.enrollmentId, "email", "scheduled", `Scheduled for ${sendAt.toISOString()}`);
   }
-  revalidatePath(PATH);
+  revalidate();
   return { id: data.id, sendAt: sendAt.toISOString() };
 }
 
@@ -191,5 +240,5 @@ export async function cancelScheduledEmail(id: string): Promise<void> {
     .eq("id", id)
     .eq("status", "pending");
   if (error) throw new Error(`cancelScheduledEmail: ${error.message}`);
-  revalidatePath(PATH);
+  revalidate();
 }

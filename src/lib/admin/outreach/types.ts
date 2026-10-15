@@ -118,7 +118,7 @@ export interface Enrollment {
   lastEvent: { action: SequenceAction; outcome: string; happenedAt: string } | null;
 }
 
-export type EventOutcome = "sent" | "scheduled" | "done" | "no_answer" | "replied" | "meeting" | "skipped";
+export type EventOutcome = "sent" | "scheduled" | "outboxed" | "done" | "no_answer" | "replied" | "meeting" | "skipped";
 
 /** `YYYY-MM-DD` arithmetic with no time zone: a calendar date is a calendar date. */
 function parseDate(iso: string): { y: number; m: number; d: number } {
@@ -195,17 +195,66 @@ export interface SendSchedule {
 }
 
 export interface ProspectingSettings {
+  /** The subject line, with the same placeholders as the body; "" lets Orion write one. */
+  subject: string;
   template: string;
   schedules: SendSchedule[];
 }
 
-export const DEFAULT_TEMPLATE = `Hi {{first_name}},
+export const DEFAULT_SUBJECT = "{{company}} and WildcatIQ";
 
-I run WildcatIQ, software that gives small operators the tools the majors have: production tracking, reconciliation against the RRC, and revenue reporting, without the headcount.
+/** The template is the editor's HTML (paragraphs, bold, links); `templateHtml` upgrades a plain-text one. */
+export const DEFAULT_TEMPLATE =
+  "<p>Hi {{first_name}},</p><p></p>" +
+  "<p>I run WildcatIQ, software that gives small operators the tools the majors have: production tracking, reconciliation against the RRC, and revenue reporting, without the headcount.</p><p></p>" +
+  "<p>I noticed {{company}} runs {{wells}} wells in {{county}} County. Would a 15-minute call this week be worth your time?</p>";
 
-I noticed {{company}} runs {{wells}} wells in {{county}} County. Would a 15-minute call this week be worth your time?`;
+const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-export const DEFAULT_SETTINGS: ProspectingSettings = { template: DEFAULT_TEMPLATE, schedules: [] };
+/** A stored template as HTML: one saved before the editor (plain text) becomes paragraphs. */
+export function templateHtml(template: string): string {
+  if (/<[a-z][^>]*>/i.test(template)) return template;
+  return template
+    .replace(/\r\n?/g, "\n")
+    .split(/\n{2,}/)
+    .filter((para) => para.trim())
+    .map((para) => `<p>${escapeHtml(para).replace(/\n/g, "<br>")}</p>`)
+    .join("<p></p>");
+}
+
+export const DEFAULT_SETTINGS: ProspectingSettings = { subject: DEFAULT_SUBJECT, template: DEFAULT_TEMPLATE, schedules: [] };
+
+/**
+ * Words a person drops when they say a company's name: legal suffixes and
+ * the trade descriptors that trail the real name ("Fair Oil Corporation"
+ * is "Fair"; "Maximus Operating LLC" is "Maximus").
+ */
+const DROPPED_TRAILERS = new Set([
+  "llc", "l.l.c", "inc", "incorporated", "co", "company", "corp", "corporation", "ltd", "limited", "lp", "l.p",
+  "llp", "plc", "partners", "partnership", "holdings", "group", "operating", "operations", "operator", "operators",
+  "oil", "gas", "o&g", "o", "g", "petroleum", "energy", "resources", "exploration", "production", "producing",
+  "development", "minerals", "royalty", "royalties", "properties", "management", "services", "enterprises",
+  "investments", "ventures", "and", "&", "of", "the",
+]);
+const ROMAN_OR_NUMBER = /^(?:[ivxl]+|\d+)$/i;
+
+function nameWord(w: string): string {
+  // Initialisms stay as they are: "JMH", "BBL", "R.K.".
+  if (w.length <= 3 || /\./.test(w) || !/[aeiouy]/i.test(w)) return w.toUpperCase();
+  return w.split(/(-)/).map((part) => (part === "-" ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())).join("");
+}
+
+/** How a person says the company's name: trailing descriptors and suffixes gone, the rest title-cased. */
+export function humanCompanyName(name: string): string {
+  const words = name.replace(/,/g, " ").trim().split(/\s+/).filter(Boolean);
+  // "INC." and "L.P." match their entries; "R." in a person's name keeps its period.
+  const bare = (w: string) => w.toLowerCase().replace(/\.+$/, "");
+  const dropped = (w: string) => DROPPED_TRAILERS.has(bare(w)) || ROMAN_OR_NUMBER.test(bare(w));
+  const core = [...words];
+  while (core.length > 1 && dropped(core[core.length - 1])) core.pop();
+  const kept = core.length && !dropped(core[core.length - 1]) ? core : words;
+  return kept.map(nameWord).join(" ");
+}
 
 /** A moment's date and clock in the admin zone. */
 function zonedParts(at: Date, timeZone = ADMIN_TIME_ZONE): { date: string; hour: number; minute: number; weekday: number } {

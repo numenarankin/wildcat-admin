@@ -17,7 +17,7 @@ import { TargetsTable } from "@/components/admin/prospecting/targets-table";
 import { TargetsMap } from "@/components/admin/prospecting/targets-map";
 import { EnrichWorkspace } from "@/components/admin/prospecting/enrich-workspace";
 import { SequenceWorkspace } from "@/components/admin/prospecting/sequence-workspace";
-import { ProspectingSettingsSheet } from "@/components/admin/prospecting/prospecting-settings-sheet";
+import { ProspectingSettingsModal } from "@/components/admin/prospecting/prospecting-settings-modal";
 import { queueTarget } from "@/lib/admin/outreach/research-actions";
 import { clearEnrollments } from "@/lib/admin/outreach/sequence-actions";
 import type { ScheduledEmail } from "@/lib/admin/outreach/settings";
@@ -319,11 +319,12 @@ export function ProspectingWorkspace({
           onChanged={refresh}
         />
       )}
-      <ProspectingSettingsSheet
+      <ProspectingSettingsModal
         key={settingsOpen ? "open" : "closed"}
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         settings={settings}
+        emailSettings={emailSettings}
         onSaved={setSettings}
       />
       {/* Outside the hidden/inert panes, so it can show over any of them. */}

@@ -1,6 +1,7 @@
 import { requireAdminPage } from "@/lib/auth/platform-admin";
 import { getEnrollments } from "@/lib/admin/outreach/sequences";
 import { getProspectingSettings, getScheduledEmails } from "@/lib/admin/outreach/settings";
+import { getOutboxes } from "@/lib/admin/outreach/outbox";
 import { readEmailIndex } from "@/lib/admin/google/gmail/index-read";
 import { getEmailSettings } from "@/lib/admin/google/gmail/email-settings";
 import { googleAdminId } from "@/lib/admin/google/guard";
@@ -11,9 +12,10 @@ export const metadata = { title: "Outbound" };
 /** Outbound: the pipeline after a target is enrolled. Reads what the Sequence tab of /prospecting reads. */
 export default async function AdminOutboundPage() {
   await requireAdminPage("outbound");
-  const [enrollments, scheduled, settings, emailSettings, googleId] = await Promise.all([
+  const [enrollments, scheduled, outboxes, settings, emailSettings, googleId] = await Promise.all([
     getEnrollments(),
     getScheduledEmails(),
+    getOutboxes(),
     getProspectingSettings(),
     getEmailSettings(),
     googleAdminId(),
@@ -28,6 +30,7 @@ export default async function AdminOutboundPage() {
       <OutboundWorkspace
         enrollments={enrollments}
         scheduled={scheduled}
+        outboxes={outboxes}
         settings={settings}
         emailIndex={emailIndex}
         emailSettings={emailSettings}

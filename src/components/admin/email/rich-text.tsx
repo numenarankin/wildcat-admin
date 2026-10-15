@@ -32,12 +32,15 @@ export function SignatureEditor({
   onChange,
   fontCss,
   fontPx,
+  trailer,
 }: {
   initialHtml: string;
   onChange: (html: string) => void;
   /** The default font and size, so the box shows the mail as it will read. */
   fontCss: string;
   fontPx: number;
+  /** Shown inside the box under the editable text, outside the editor (a fixed signature). */
+  trailer?: React.ReactNode;
 }) {
   const editor = useEditor({
     extensions: [
@@ -59,6 +62,7 @@ export function SignatureEditor({
       {editor && <SignatureToolbar editor={editor} />}
       <div className="min-h-32 px-4 py-3" style={{ fontFamily: fontCss, fontSize: fontPx }}>
         <EditorContent editor={editor} className="[&_.ProseMirror]:min-h-24 [&_.ProseMirror]:outline-none [&_a]:text-blue-600! [&_a]:underline [&_p]:my-0" />
+        {trailer}
       </div>
     </div>
   );

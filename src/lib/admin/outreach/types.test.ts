@@ -4,6 +4,8 @@ import {
   advance,
   DEFAULT_SEQUENCE_STEPS,
   fillTemplate,
+  templateHtml,
+  humanCompanyName,
   isGenericEmail,
   nextOccurrence,
   stepDueOn,
@@ -107,5 +109,34 @@ describe("fillTemplate", () => {
       wells: "32",
       county: "Midland",
     })).toBe("Hi John, Acme Oil has 32 wells in Midland. {{other}}");
+  });
+});
+
+describe("templateHtml", () => {
+  it("turns a plain-text template into paragraphs and leaves HTML alone", () => {
+    expect(templateHtml("Hi {{first_name}},\n\nLine one\nline two")).toBe("<p>Hi {{first_name}},</p><p></p><p>Line one<br>line two</p>");
+    expect(templateHtml("<p>Hi <b>there</b></p>")).toBe("<p>Hi <b>there</b></p>");
+    expect(templateHtml("a < b and c > d")).toBe("<p>a &lt; b and c &gt; d</p>");
+  });
+});
+
+describe("humanCompanyName", () => {
+  it("says the name the way a person would", () => {
+    const cases: [string, string][] = [
+      ["MAXIMUS OPERATING, LTD.", "Maximus"],
+      ["FAIR OIL CORPORATION", "Fair"],
+      ["CARR RESOURCES, INC.", "Carr"],
+      ["TANOS EXPLORATION IV, LLC", "Tanos"],
+      ["JMH PRODUCTION, LLC", "JMH"],
+      ["BBL OPERATING COMPANY LLC", "BBL"],
+      ["HILLWOOD O & G OPERATING CO LP", "Hillwood"],
+      ["CROSS TIMBERS ENERGY, LLC", "Cross Timbers"],
+      ["MARSHALL R. YOUNG OPERATING, LLC", "Marshall R. Young"],
+      ["OVERTON PARK OIL & GAS LP", "Overton Park"],
+      ["BANDERA EAGLE FORD, LLC", "Bandera Eagle Ford"],
+      ["ENERGY RESOURCES INC", "Energy Resources INC"],
+      ["Machin & Associates", "Machin & Associates"],
+    ];
+    for (const [input, want] of cases) expect(humanCompanyName(input), input).toBe(want);
   });
 });

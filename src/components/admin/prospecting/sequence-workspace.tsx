@@ -1,16 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDownIcon, Loader2Icon, XIcon } from "lucide-react";
+import { Loader2Icon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ACCOUNTING_HEADER_CLASS,
@@ -18,15 +12,17 @@ import {
   ACCOUNTING_ROW_CLASS,
   ACCOUNTING_TABLE_CLASS,
 } from "@/components/accounting/accounting-table";
-import { EmailCardLayer, type CardMode, type CardSpec } from "@/components/admin/email/email-card";
+import { SwipeUpModal } from "@/components/wells/swipe-up-modal";
 import { EmailComposeCard, type ComposeInit } from "@/components/admin/email/email-compose-card";
 import { cn } from "@/lib/utils";
 import type { EmailIndex } from "@/lib/admin/google/gmail/suggest";
 import type { EmailSettings } from "@/lib/admin/google/gmail/email-style";
 import type { EmailDraftDirective } from "@/lib/admin/google/gmail/draft-spec";
 import { draftOutreachEmail } from "@/lib/admin/outreach/draft";
-import { cancelScheduledEmail, deleteEnrollment, recordStep, scheduleEmail, stopEnrollment } from "@/lib/admin/outreach/sequence-actions";
+import { cancelScheduledEmail, deleteEnrollment, recordStep } from "@/lib/admin/outreach/sequence-actions";
+import { addToOutbox } from "@/lib/admin/outreach/outbox-actions";
 import type { ScheduledEmail } from "@/lib/admin/outreach/settings";
+import type { Outbox } from "@/lib/admin/outreach/outbox-types";
 import {
   DEFAULT_SEQUENCE_STEPS,
   todayInAdminZone,
@@ -48,6 +44,7 @@ const when = new Intl.DateTimeFormat("en-US", {
 const OUTCOME_LABEL: Record<string, string> = {
   sent: "Emailed",
   scheduled: "Email scheduled",
+  outboxed: "In outbox",
   done: "Called",
   no_answer: "No answer",
   replied: "Replied",
@@ -68,12 +65,13 @@ function stepLabel(stepIndex: number): { action: SequenceAction; text: string } 
 /**
  * The Sequence tab: every enrolled company, what is due and when, with the
  * day's work first. Draft opens the Email page's compose card with Orion's
- * draft in it; the user sends, or schedules it for the cron. Calls are the
+ * draft in it; the user sends, or adds it to an outbox. Calls are the
  * user's own; the row records the outcome and moves on.
  */
 export function SequenceWorkspace({
   enrollments,
   scheduled,
+  outboxes = [],
   settings,
   emailIndex,
   emailSettings,
@@ -81,6 +79,8 @@ export function SequenceWorkspace({
 }: {
   enrollments: Enrollment[];
   scheduled: ScheduledEmail[];
+  /** The open outboxes a draft can be added to (the /outbound Queue tab). */
+  outboxes?: Outbox[];
   settings: ProspectingSettings;
   emailIndex: EmailIndex;
   emailSettings: EmailSettings;
@@ -94,7 +94,6 @@ export function SequenceWorkspace({
     init: ComposeInit;
     draft: { nonce: number; directive: EmailDraftDirective };
     title: string;
-    mode: CardMode;
   } | null>(null);
   const today = todayInAdminZone();
 
@@ -108,7 +107,6 @@ export function SequenceWorkspace({
         init: { to: d.to, subject: d.subject },
         draft: { nonce: 1, directive: { to: d.to, subject: d.subject, html: d.html } },
         title: d.subject,
-        mode: "open",
       });
     } catch (error) {
       console.error("Failed to draft", error);
@@ -130,18 +128,6 @@ export function SequenceWorkspace({
     });
   }
 
-  function stop(e: Enrollment) {
-    startTransition(async () => {
-      try {
-        await stopEnrollment(e.id);
-      } catch (error) {
-        console.error("Failed to stop", error);
-        toast.error("Couldn't stop the sequence.");
-      }
-      onChanged();
-    });
-  }
-
   function remove(e: Enrollment) {
     startTransition(async () => {
       try {
@@ -154,47 +140,53 @@ export function SequenceWorkspace({
     });
   }
 
-  const cards: CardSpec[] = compose
-    ? [
-        {
-          key: compose.key,
-          kind: "compose",
-          title: compose.title || "New message",
-          mode: compose.mode,
-          node: (
-            <EmailComposeCard
-              cardKey={compose.key}
-              init={compose.init}
-              index={emailIndex}
-              settings={emailSettings}
-              draft={compose.draft}
-              onSubjectChange={(subject) => setCompose((c) => (c ? { ...c, title: subject } : c))}
-              onSent={() => {
-                const e = compose.enrollment;
+  // The draft, in the app's modal: dimmed + blurred page, Escape to close,
+  // the card's own fields and Send / Add to outbox inside.
+  const draftModal = compose && (
+    <SwipeUpModal
+      open
+      onClose={() => setCompose(null)}
+      title={compose.title || "New message"}
+      className="sm:max-w-4xl"
+    >
+      <div className="flex h-[80vh] max-h-full min-h-0 flex-col">
+        <EmailComposeCard
+          cardKey={compose.key}
+          init={compose.init}
+          index={emailIndex}
+          settings={emailSettings}
+          draft={compose.draft}
+          onSubjectChange={(subject) => setCompose((c) => (c ? { ...c, title: subject } : c))}
+          onSent={() => {
+            const e = compose.enrollment;
+            setCompose(null);
+            record(e, "email", "sent");
+          }}
+          schedule={{
+            options: settings.schedules,
+            existing: outboxes
+              .filter((o) => o.status === "open")
+              .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
+              .map((o) => ({ id: o.id, label: `${o.scheduleName ?? "Outbox"} · ${when.format(new Date(o.dueAt))}` })),
+            label: "Add to outbox",
+            onSchedule: async (form, at) => {
+              try {
+                const { dueAt } = await addToOutbox({ enrollmentId: compose.enrollment.id, ...form, when: at });
+                toast.success(`In the outbox for ${when.format(new Date(dueAt))} Central.`);
                 setCompose(null);
-                record(e, "email", "sent");
-              }}
-              schedule={{
-                options: settings.schedules,
-                onSchedule: async (form, at) => {
-                  try {
-                    const { sendAt } = await scheduleEmail({ enrollmentId: compose.enrollment.id, ...form, when: at });
-                    toast.success(`Scheduled for ${when.format(new Date(sendAt))} Central.`);
-                    setCompose(null);
-                    onChanged();
-                    return true;
-                  } catch (error) {
-                    console.error("Failed to schedule", error);
-                    toast.error(error instanceof Error ? error.message : "Couldn't schedule the email.");
-                    return false;
-                  }
-                },
-              }}
-            />
-          ),
-        },
-      ]
-    : [];
+                onChanged();
+                return true;
+              } catch (error) {
+                console.error("Failed to add to the outbox", error);
+                toast.error(error instanceof Error ? error.message : "Couldn't add it to the outbox.");
+                return false;
+              }
+            },
+          }}
+        />
+      </div>
+    </SwipeUpModal>
+  );
 
   const active = enrollments.filter((e) => e.state === "active");
   const rest = enrollments.filter((e) => e.state !== "active");
@@ -252,9 +244,12 @@ export function SequenceWorkspace({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-1">
-                      {e.state === "active" && (
-                        <>
-                        {step.action === "email" ? (
+                      {e.state === "active" &&
+                        // An email waiting in an outbox already advanced the step; the next
+                        // step's buttons wait until it has gone out.
+                        (e.lastEvent?.outcome === "outboxed" ? (
+                          <Badge variant="outline">In outbox</Badge>
+                        ) : step.action === "email" ? (
                           <Button size="xs" onClick={() => handleDraft(e)} disabled={drafting === e.id || !e.contact?.email}>
                             {drafting === e.id && <Loader2Icon className="animate-spin" />}
                             Draft
@@ -268,21 +263,7 @@ export function SequenceWorkspace({
                               No answer
                             </Button>
                           </>
-                        )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger render={<Button size="xs" variant="ghost" />}>
-                            Outcome
-                            <ChevronDownIcon className="size-3" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => record(e, step.action, "replied")}>Replied</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => record(e, step.action, "meeting")}>Meeting booked</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => record(e, step.action, "skipped")}>Skip this step</DropdownMenuItem>
-                            <DropdownMenuItem variant="destructive" onClick={() => stop(e)}>Stop sequence</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        </>
-                      )}
+                        ))}
                       <button
                         type="button"
                         aria-label={`Delete ${e.companyName} from the sequence`}
@@ -344,11 +325,7 @@ export function SequenceWorkspace({
         </section>
       )}
 
-      <EmailCardLayer
-        cards={cards}
-        onMode={(_, mode) => setCompose((c) => (c ? { ...c, mode } : c))}
-        onClose={() => setCompose(null)}
-      />
+      {draftModal}
     </div>
   );
 }

@@ -2,9 +2,12 @@
 
 import { cn } from "@/lib/utils";
 
-export type OutboundTab = "queue";
+export type OutboundTab = "queue" | "outbox";
 
-const TABS: { value: OutboundTab; label: string }[] = [{ value: "queue", label: "Queue" }];
+const TABS: { value: OutboundTab; label: string }[] = [
+  { value: "queue", label: "Queue" },
+  { value: "outbox", label: "Outbox" },
+];
 
 /** Segmented tab switch, the same control the prospecting toolbar uses. */
 function TabToggle({ tab, onTab }: { tab: OutboundTab; onTab: (tab: OutboundTab) => void }) {

@@ -76,9 +76,13 @@ export function EmailComposeCard({
    */
   schedule?: {
     options: SendSchedule[];
+    /** Existing destinations (the open outboxes), listed before the schedules. */
+    existing?: { id: string; label: string }[];
+    /** The control's name; "Schedule" when unset. */
+    label?: string;
     onSchedule: (
       form: { to: string; cc: string; bcc: string; subject: string; html: string },
-      when: { at: string } | { scheduleId: string }
+      when: { at: string } | { scheduleId: string } | { outboxId: string }
     ) => Promise<boolean>;
   };
 }) {
@@ -96,24 +100,26 @@ export function EmailComposeCard({
   const [showQuoted, setShowQuoted] = useState(false);
   const [attachments, setAttachments] = useState(init.forward?.attachments ?? []);
   const [sending, setSending] = useState(false);
+  /** The schedule / outbox handler is running: its own control spins, not Send. */
+  const [queuing, setQueuing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   /** The one-off time being picked for Schedule, as the input's local value. */
   const [pickAt, setPickAt] = useState<string | null>(null);
 
-  async function handleSchedule(when: { at: string } | { scheduleId: string }) {
-    if (!schedule || sending) return;
+  async function handleSchedule(when: { at: string } | { scheduleId: string } | { outboxId: string }) {
+    if (!schedule || sending || queuing) return;
     if (!(form.to.trim() || form.cc.trim() || form.bcc.trim())) {
       setError("Add a recipient.");
       return;
     }
-    setSending(true);
+    setQueuing(true);
     setError(null);
     try {
       const html = init.quoted ? `${form.html}<br>${init.quoted}` : form.html;
       const ok = await schedule.onSchedule({ ...form, html }, when);
-      if (!ok) setError("Couldn't schedule the email.");
+      if (!ok) setError(schedule.label ? `Couldn't ${schedule.label.toLowerCase()}.` : "Couldn't schedule the email.");
     } finally {
-      setSending(false);
+      setQueuing(false);
       setPickAt(null);
     }
   }
@@ -162,7 +168,7 @@ export function EmailComposeCard({
     e.preventDefault();
     // Only the user's own click or Enter sends. Never remove this check.
     if (!e.nativeEvent.isTrusted) return;
-    if (sending) return;
+    if (sending || queuing) return;
     setSending(true);
     setError(null);
     const html = init.quoted ? `${form.html}<br>${init.quoted}` : form.html;
@@ -241,10 +247,11 @@ export function EmailComposeCard({
                     type="button"
                     variant="outline"
                     className="h-9"
-                    disabled={sending || !pickAt}
+                    disabled={sending || queuing || !pickAt}
                     onClick={() => pickAt && handleSchedule({ at: new Date(pickAt).toISOString() })}
                   >
-                    Schedule
+                    {queuing && <Loader2Icon className="animate-spin" />}
+                    {schedule?.label ?? "Schedule"}
                   </Button>
                   <Button type="button" variant="ghost" size="icon-sm" aria-label="Cancel" onClick={() => setPickAt(null)}>
                     <XIcon />
@@ -254,13 +261,19 @@ export function EmailComposeCard({
               {schedule && pickAt === null && (
                 <DropdownMenu>
                   <DropdownMenuTrigger
-                    render={<Button type="button" variant="outline" className="h-9 rounded-full px-4" disabled={sending} />}
+                    render={<Button type="button" variant="outline" className="h-9 rounded-full px-4" disabled={sending || queuing} />}
                   >
-                    <CalendarClockIcon />
-                    Schedule
+                    {queuing ? <Loader2Icon className="animate-spin" /> : <CalendarClockIcon />}
+                    {schedule.label ?? "Schedule"}
                     <ChevronDownIcon className="size-3.5" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    {schedule.existing?.map((o) => (
+                      <DropdownMenuItem key={o.id} className="cursor-pointer" onClick={() => handleSchedule({ outboxId: o.id })}>
+                        {o.label}
+                      </DropdownMenuItem>
+                    ))}
+                    {(schedule.existing?.length ?? 0) > 0 && <DropdownMenuSeparator />}
                     {schedule.options.map((s) => (
                       <DropdownMenuItem key={s.id} className="cursor-pointer" onClick={() => handleSchedule({ scheduleId: s.id })}>
                         {s.name}
@@ -273,7 +286,7 @@ export function EmailComposeCard({
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
-              <Button type="submit" className="h-9 rounded-full px-5 shadow-[0_0_8px_rgba(0,0,0,0.18)]" disabled={sending || !(form.to.trim() || form.cc.trim() || form.bcc.trim())}>
+              <Button type="submit" className="h-9 rounded-full px-5 shadow-[0_0_8px_rgba(0,0,0,0.18)]" disabled={sending || queuing || !(form.to.trim() || form.cc.trim() || form.bcc.trim())}>
                 {sending && <Loader2Icon className="animate-spin" />}
                 Send
               </Button>

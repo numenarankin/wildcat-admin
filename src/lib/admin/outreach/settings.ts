@@ -16,16 +16,16 @@ export async function getProspectingSettings(): Promise<ProspectingSettings> {
   const sb = await getSupabaseServer();
   const { data, error } = await sb
     .from("admin_prospecting_settings")
-    .select("template, schedules")
+    .select("subject, template, schedules")
     .eq("user_id", user.id)
-    .maybeSingle<{ template: string; schedules: unknown }>();
+    .maybeSingle<{ subject: string; template: string; schedules: unknown }>();
   if (error) {
     console.error("getProspectingSettings failed", error.message);
     return DEFAULT_SETTINGS;
   }
   if (!data) return DEFAULT_SETTINGS;
   const schedules = Array.isArray(data.schedules) ? data.schedules.filter(isSendSchedule) : [];
-  return { template: data.template || DEFAULT_SETTINGS.template, schedules };
+  return { subject: data.subject ?? "", template: data.template || DEFAULT_SETTINGS.template, schedules };
 }
 
 /** Pending scheduled emails, soonest first, for the Sequence tab's list. */

@@ -1,3 +1,5 @@
+import { orionFileOf, type OrionFile } from "@/lib/ai/file-spec";
+
 /**
  * The chart contract between Orion and the UI. The agent supplies only the DATA
  * and a few structural choices (chart type, which keys to plot); EVERYTHING that
@@ -153,7 +155,8 @@ export function chartSpecsFromMessage(message: {
 /** One rendered chunk of an assistant turn, in the order it was produced. */
 export type MessageBlock =
   | { kind: "text"; text: string }
-  | { kind: "chart"; spec: ChartSpec };
+  | { kind: "chart"; spec: ChartSpec }
+  | { kind: "file"; file: OrionFile };
 
 /**
  * Split a message into text and chart blocks IN PART ORDER.
@@ -187,6 +190,12 @@ export function messageBlocks(message: {
     };
     if (p?.type === "text") {
       buffer += p.text ?? "";
+      continue;
+    }
+    const file = orionFileOf(p);
+    if (file) {
+      flush();
+      blocks.push({ kind: "file", file });
       continue;
     }
     if (p?.type === "tool-render_chart") {

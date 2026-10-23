@@ -1,12 +1,8 @@
 import { hasSupabase } from "@/lib/env";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
-/**
- * Every status a task can hold. `testing` exists only on the admin team's
- * board (`ADMIN_TASK_COLUMNS`, table `admin_tasks`); the customer columns
- * below never offer it and the customer enum cannot store it.
- */
-export type TaskStatus = "planned" | "priority" | "doing" | "testing" | "done";
+/** Every status a task can hold. */
+export type TaskStatus = "planned" | "priority" | "doing" | "done";
 
 export type TaskPriority = "Low" | "Medium" | "High";
 
@@ -53,17 +49,11 @@ export const TASK_COLUMNS: TaskColumn[] = [
 ];
 
 /**
- * The admin team's board: the customer columns with Testing between Doing
- * and Done. Same stored spellings, so `TasksBoard` and `TaskModal` take
- * either list as their `columns`.
+ * The admin team's board (`admin_tasks`): the customer columns. Its Testing
+ * column was removed 2026-10-23; the enum value `testing` still exists in the
+ * database but no row holds it (migration 2026102300300 moved them to Doing).
  */
-export const ADMIN_TASK_COLUMNS: TaskColumn[] = [
-  { status: "planned", label: "Backlog" },
-  { status: "priority", label: "Queue" },
-  { status: "doing", label: "Doing" },
-  { status: "testing", label: "Testing" },
-  { status: "done", label: "Done" },
-];
+export const ADMIN_TASK_COLUMNS: TaskColumn[] = TASK_COLUMNS;
 
 /**
  * A Google Tasks list on /admin/tasks: Google stores only open or completed,

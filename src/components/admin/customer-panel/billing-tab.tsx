@@ -21,7 +21,7 @@ import {
   cancelNow,
   changeBand,
   extendTrial,
-  grantPlatformCredit,
+  adjustPlatformCredit,
   pauseCollection,
   refundInvoice,
   removeDiscounts,
@@ -464,24 +464,27 @@ export function BillingTab({
               <SettingsField label="Reason" className="min-w-48 flex-1">
                 <Input value={creditReason} onChange={(e) => setCreditReason(e.target.value)} className="h-9" />
               </SettingsField>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || !creditUsd || !creditReason.trim()}
-                onClick={() =>
-                  void go(
-                    () => grantPlatformCredit(orgId, Number(creditUsd), creditReason),
-                    `${usdCents.format(Number(creditUsd))} credit granted.`
-                  ).then((ok) => {
-                    if (ok) {
-                      setCreditUsd("");
-                      setCreditReason("");
-                    }
-                  })
-                }
-              >
-                Grant credit
-              </Button>
+              {([1, -1] as const).map((sign) => (
+                <Button
+                  key={sign}
+                  type="button"
+                  variant="outline"
+                  disabled={busy || !(Number(creditUsd) > 0) || !creditReason.trim()}
+                  onClick={() =>
+                    void go(
+                      () => adjustPlatformCredit(orgId, sign * Number(creditUsd), creditReason),
+                      `${usdCents.format(Number(creditUsd))} credit ${sign > 0 ? "added" : "removed"}.`
+                    ).then((ok) => {
+                      if (ok) {
+                        setCreditUsd("");
+                        setCreditReason("");
+                      }
+                    })
+                  }
+                >
+                  {sign > 0 ? "Add credit" : "Remove credit"}
+                </Button>
+              ))}
             </div>
           </SettingsCard>
         </SettingsSection>

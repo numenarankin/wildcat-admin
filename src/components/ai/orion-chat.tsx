@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from "react";
 import {
   PlusIcon,
   PaperclipIcon,
@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { AddFileDialog } from "@/components/projects/add-file-dialog";
 import { ApprovalCard, pendingApprovals } from "@/components/ai/tool-approval";
 import { OrionChart } from "@/components/ai/orion-chart";
+import { OrionFileCard } from "@/components/ai/orion-file";
 import { messageBlocks } from "@/lib/ai/chart-spec";
 import { useSpeech, type SpeechState } from "@/components/ai/use-speech";
 import { useComposerShape } from "@/components/ai/use-composer-shape";
@@ -424,6 +425,16 @@ export function OrionChat({
     setAttachments((prev) => [...prev, ...next]);
   }
 
+  // A pasted screenshot is staged like a picked file; pasted text types as usual.
+  // Same rule as the side panel's composer (`useStagedFiles`).
+  function handlePaste(e: ClipboardEvent) {
+    const files = e.clipboardData?.files;
+    if (!files || files.length === 0) return;
+    if (e.clipboardData.getData("text/plain").trim()) return;
+    e.preventDefault();
+    addDiskFiles(files);
+  }
+
   function removeAttachment(key: string) {
     setAttachments((prev) => prev.filter((a) => a.key !== key));
   }
@@ -589,6 +600,7 @@ export function OrionChat({
               handleSend();
             }
           }}
+          onPaste={handlePaste}
           rows={1}
           placeholder="How can I help you today?"
           className={COMPOSER_TEXTAREA}
@@ -795,6 +807,7 @@ export function OrionChat({
                   handleSend();
                 }
               }}
+              onPaste={handlePaste}
               rows={1}
               placeholder="Ask Orion…"
               className={COMPOSER_TEXTAREA}
@@ -959,7 +972,17 @@ function MessageBubble({
           // bubble, full container width; only the trailing block glides, since
           // that's the one still arriving.
           blocks.map((block, i) =>
-            block.kind === "chart" ? (
+            block.kind === "file" ? (
+              <motion.div
+                key={`file-${i}`}
+                className="w-full"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.26, ease: "easeOut" }}
+              >
+                <OrionFileCard file={block.file} surface="page" />
+              </motion.div>
+            ) : block.kind === "chart" ? (
               // A chart lands mid-answer, with text already above it, so a small
               // rise reads as "settling in" rather than fighting a reflow.
               <motion.div

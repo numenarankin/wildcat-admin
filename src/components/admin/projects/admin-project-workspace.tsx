@@ -41,7 +41,7 @@ const ADMIN_PERSISTENCE: ConversationPersistence = {
 /**
  * An admin project: the customer project workspace (`ProjectWorkspace`) over
  * the admin tables. Same toolbar, same four tabs. Orion is the admin
- * assistant scoped to this project, Tasks is the admin board (with Testing)
+ * assistant scoped to this project, Tasks is the admin board
  * filtered to the project, Notes is the shared notes grid over `admin_notes`,
  * Files is the project's uploads. No Share: every admin sees every admin
  * project, so there is no one to share with.

@@ -21,6 +21,7 @@ import { uuid } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ApprovalCard, pendingApprovals } from "@/components/ai/tool-approval";
 import { OrionChart } from "@/components/ai/orion-chart";
+import { OrionFileCard } from "@/components/ai/orion-file";
 import { messageBlocks } from "@/lib/ai/chart-spec";
 import {
   hasVisibleContent,
@@ -407,7 +408,16 @@ export function ChatPanel({
                   // as it mounts — the other half of the crossfade with the
                   // thinking indicator.
                   messageBlocks(m).map((block, i) =>
-                    block.kind === "chart" ? (
+                    block.kind === "file" ? (
+                      <motion.div
+                        key={`file-${i}`}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.26, ease: "easeOut" }}
+                      >
+                        <OrionFileCard file={block.file} surface="drawer" />
+                      </motion.div>
+                    ) : block.kind === "chart" ? (
                       <motion.div
                         key={`chart-${i}`}
                         initial={{ opacity: 0, y: 6 }}

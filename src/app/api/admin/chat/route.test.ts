@@ -42,6 +42,18 @@ vi.mock("@/lib/ai/admin/prospecting-tools", () => ({
   }),
 }));
 
+// The database catalog reaches Supabase and Stripe; its shape is what matters here.
+vi.mock("@/lib/ai/admin/db-tools", () => ({
+  dbTools: () => ({ db_query: { description: "query" }, billing_history: { description: "billing" } }),
+}));
+
+vi.mock("@/lib/ai/admin/task-tools", () => ({
+  taskTools: () => ({ list_team_tasks: { description: "tasks" }, create_team_task: { description: "create", needsApproval: true } }),
+}));
+
+vi.mock("@/lib/ai/admin/web-tools", () => ({ webTools: () => ({ search_web: { description: "web" }, read_page: { description: "page" } }) }));
+vi.mock("@/lib/ai/admin/file-tools", () => ({ fileTools: () => ({ create_file: { description: "file" } }) }));
+
 // The caller's Google connection; none unless a test connects one.
 const googleSettings = vi.fn(async (): Promise<unknown> => null);
 vi.mock("@/lib/admin/google/settings", () => ({ getGoogleSettings: () => googleSettings() }));
@@ -75,7 +87,7 @@ describe("POST /api/admin/chat", () => {
     expect(res.status).toBe(200);
     expect(streamText).toHaveBeenCalledTimes(1);
     const call = (streamText.mock.calls[0] as unknown[])[0] as { tools: Record<string, unknown>; system: string; model: { id: string } };
-    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "add_targets", "business_metrics", "draft_email", "list_customers", "list_targets", "platform_admins", "support_inbox"]);
+    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "add_targets", "billing_history", "business_metrics", "create_file", "create_team_task", "db_query", "draft_email", "list_customers", "list_targets", "list_team_tasks", "platform_admins", "read_page", "search_web", "support_inbox"]);
     for (const customerTool of ["get_wells", "search_documents", "create_task", "rrc_search"]) {
       expect(call.tools).not.toHaveProperty(customerTool);
     }

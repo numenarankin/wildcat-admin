@@ -12,6 +12,10 @@ import { adminTools } from "@/lib/ai/admin/tools";
 import { googleTools } from "@/lib/ai/admin/google-tools";
 import { draftTools } from "@/lib/ai/admin/draft-tools";
 import { prospectingTools } from "@/lib/ai/admin/prospecting-tools";
+import { dbTools } from "@/lib/ai/admin/db-tools";
+import { taskTools } from "@/lib/ai/admin/task-tools";
+import { webTools } from "@/lib/ai/admin/web-tools";
+import { fileTools } from "@/lib/ai/admin/file-tools";
 import { runAsOrion } from "@/lib/admin/google/orion-guard";
 import { getGoogleSettings } from "@/lib/admin/google/settings";
 import { buildAdminSystemPrompt } from "@/lib/ai/admin/system-prompt";
@@ -83,7 +87,14 @@ export async function POST(req: Request): Promise<Response> {
     model: anthropic(MODEL),
     system,
     messages: modelMessages,
-    tools: asOrion({ ...adminTools(), ...googleTools(connected), ...draftTools(), ...prospectingTools() }),
+    tools: asOrion({ ...adminTools(), ...googleTools(connected), ...draftTools(), ...prospectingTools(), ...dbTools(),
+      ...taskTools(),
+      ...webTools({
+        search: "Use it for anything outside Wildcat's own data: a company, a person, news, prices, regulations. In the objective say what should rank first and what facts to pull.",
+        read: "Use it to read a result in full before quoting it.",
+      }),
+      ...fileTools(),
+    }),
     // Business questions are a tool call and a sentence; the thinking phase
     // is what costs the wall clock here (see CLAUDE.md on Opus 5 effort).
     providerOptions: { anthropic: { effort: "medium", cacheControl: { type: "ephemeral" } } },

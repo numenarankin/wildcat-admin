@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { pendingApprovals } from "@/components/ai/tool-approval";
 import { chartSpecsFromMessage } from "@/lib/ai/chart-spec";
+import { orionFileOf } from "@/lib/ai/file-spec";
 import { toolActivity } from "@/lib/ai/tool-activity";
 
 /**
@@ -96,6 +97,7 @@ export function hasVisibleContent(message: UIMessage): boolean {
   if (hasText(message)) return true;
   if (pendingApprovals(message).length > 0) return true;
   if (chartSpecsFromMessage(message).length > 0) return true;
+  if (message.parts.some((p) => orionFileOf(p))) return true;
   return message.parts.some((p) => p.type === "file");
 }
 

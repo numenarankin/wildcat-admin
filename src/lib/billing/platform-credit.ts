@@ -144,6 +144,31 @@ export async function addPlatformCredit(
 }
 
 /**
+ * Take credit away from an org by hand. Service-role only. All or nothing:
+ * returns the cents removed, or 0 when the balance is short or the call failed.
+ */
+export async function deductPlatformCredit(
+  admin: SupabaseClient,
+  orgId: string,
+  cents: number,
+  reason: string,
+  meta?: Record<string, unknown>
+): Promise<number> {
+  if (!orgId || !Number.isFinite(cents) || cents <= 0) return 0;
+  const { data, error } = await admin.rpc("platform_credit_deduct", {
+    p_org: orgId,
+    p_cents: Math.round(cents),
+    p_reason: reason,
+    p_meta: meta ?? null,
+  });
+  if (error) {
+    console.error("deductPlatformCredit failed", error.message);
+    return 0;
+  }
+  return Number(data ?? 0);
+}
+
+/**
  * Spend up to `cents` of an org's balance. Returns the cents ACTUALLY spent,
  * which the caller must use rather than assuming the full amount: the RPC
  * clamps to the live balance, and returns 0 outright when `invoiceId` already

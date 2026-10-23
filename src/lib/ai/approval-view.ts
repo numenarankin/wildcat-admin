@@ -112,6 +112,9 @@ export const BATCH_ACTIONS: Record<
     noun: "disposal reading",
   },
   add_targets: { key: "operators", verb: "Add", noun: "target" },
+  create_team_task: { key: "tasks", verb: "Add", noun: "task to the team board", plural: "tasks to the team board" },
+  update_team_task: { key: "tasks", verb: "Change", noun: "task on the team board", plural: "tasks on the team board" },
+  delete_team_task: { key: "tasks", verb: "Delete", noun: "task from the team board", plural: "tasks from the team board" },
   queue_for_enrichment: {
     key: "operators",
     verb: "Queue",

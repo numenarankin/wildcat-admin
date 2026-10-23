@@ -21,8 +21,8 @@ const GOOGLE_PREFIX = "google:";
 const GOOGLE_HIDDEN: readonly TaskField[] = ["assignee", "priority", "deadlineTime", "budget"];
 
 /**
- * The admin team's task board: the customer Tasks page over `admin_tasks`,
- * with a Testing column between Doing and Done. With Google Tasks connected,
+ * The admin team's task board: the customer Tasks page over `admin_tasks`.
+ * With Google Tasks connected,
  * `?source=google:<listId>`
  * shows one of the admin's own Google lists on the same board instead
  * (docs/plans/google-integration.md D4).

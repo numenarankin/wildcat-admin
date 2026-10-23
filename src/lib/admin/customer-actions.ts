@@ -9,7 +9,7 @@ import { hasStripe } from "@/lib/env";
 import { getWildcatAppUrl, wildcatAppUrl } from "@/lib/wildcat-app-url";
 import { countBillableWells } from "@/lib/billing/subscription";
 import { billableQuantity, isTierKey, recommendTier, tierByKey } from "@/lib/billing/tiers";
-import { addPlatformCredit } from "@/lib/billing/platform-credit";
+import { addPlatformCredit, deductPlatformCredit } from "@/lib/billing/platform-credit";
 import { switchOrgToAnnual } from "@/lib/billing/org-billing";
 import { sendResetEmail } from "@/lib/email/reset-email";
 import type { ActionResult } from "@/lib/admin/customer-panel-types";
@@ -271,17 +271,20 @@ export async function refundInvoice(
   });
 }
 
-/** Platform credit (USD), spent on the customer's invoices and top-ups. */
-export async function grantPlatformCredit(orgId: string, usd: number, reason: string): Promise<ActionResult> {
+/** Add (positive) or take away (negative) platform credit (USD), spent on the customer's invoices and top-ups. */
+export async function adjustPlatformCredit(orgId: string, usd: number, reason: string): Promise<ActionResult> {
   return run(orgId, async (actorId) => {
     const cents = Math.round(usd * 100);
-    if (!Number.isFinite(cents) || cents <= 0) throw new Error("The amount must be more than zero.");
+    if (!Number.isFinite(cents) || cents === 0) throw new Error("Give an amount, not zero.");
     if (!reason.trim()) throw new Error("Give a reason; the customer sees it in their credit history.");
-    const balance = await addPlatformCredit(getSupabaseAdmin(), orgId, cents, "adjustment", reason.trim(), {
-      source: "admin_panel",
-      by: actorId,
-    });
-    if (balance <= 0) throw new Error("The credit could not be recorded.");
+    const meta = { source: "admin_panel", by: actorId };
+    if (cents > 0) {
+      const balance = await addPlatformCredit(getSupabaseAdmin(), orgId, cents, "adjustment", reason.trim(), meta);
+      if (balance <= 0) throw new Error("The credit could not be recorded.");
+    } else {
+      const removed = await deductPlatformCredit(getSupabaseAdmin(), orgId, -cents, reason.trim(), meta);
+      if (removed <= 0) throw new Error("That is more than their platform credit balance.");
+    }
   });
 }
 

@@ -26,7 +26,8 @@ import {
   type TaskField,
   type TaskStatus,
 } from "@/lib/tasks/tasks";
-import { usePageContextSlice } from "@/lib/ai/use-ai-context";
+import { usePageAction, usePageContextSlice } from "@/lib/ai/use-ai-context";
+import { TASKS_REFRESH_ACTION } from "@/lib/tasks/refresh-action";
 import { openTaskSlice, tasksBoardSlice } from "@/lib/ai/admin/page-slices";
 
 /**
@@ -95,6 +96,8 @@ export function TasksBoard({
   // The Orion drawer's view of the board, and of the task open in its modal.
   usePageContextSlice("tasks-board", tasksBoardSlice(contextLabel, tasks, columns));
   usePageContextSlice("tasks-board-open", editing ? openTaskSlice(editing, columns) : null);
+  // An approved Orion write to the board: fetch the list again.
+  usePageAction(TASKS_REFRESH_ACTION, () => router.refresh());
 
   const handleDropTask = useCallback(
     (taskId: string, status: TaskStatus) => {

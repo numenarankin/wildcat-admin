@@ -47,6 +47,18 @@ export interface ChatHistoryResult {
   note?: string;
 }
 
+/**
+ * Which pair of tables holds the history. The customer Orion reads its own
+ * (`conversations` / `messages`); the admin Orion reads `admin_conversations`
+ * / `admin_messages`, the same shape. Both are read through RLS as the
+ * signed-in user, so either way it is only that user's own chats.
+ */
+export interface HistoryTables {
+  conversations: string;
+  messages: string;
+}
+const CUSTOMER_TABLES: HistoryTables = { conversations: "conversations", messages: "messages" };
+
 interface PartLike {
   type?: string;
   text?: string;
@@ -94,14 +106,15 @@ const SNIPPET_CHARS = 600;
 export async function searchChatHistory(
   query: string,
   limit = 10,
-  folderId?: string | null
+  folderId?: string | null,
+  tables: HistoryTables = CUSTOMER_TABLES
 ): Promise<ChatHistoryResult> {
   const empty = { hits: [], matchedOn: [], relaxed: [] };
   if (!hasSupabase() || !query.trim()) return empty;
   const sb = await getSupabaseServer();
 
   let convQuery = sb
-    .from("conversations")
+    .from(tables.conversations)
     .select("id, title, created_at, updated_at")
     .order("updated_at", { ascending: false });
   if (folderId) convQuery = convQuery.eq("folder_id", folderId);
@@ -111,7 +124,7 @@ export async function searchChatHistory(
   }
 
   const { data: msgs } = await sb
-    .from("messages")
+    .from(tables.messages)
     .select("conversation_id, role, parts, position")
     .in(
       "conversation_id",
@@ -240,20 +253,21 @@ export interface ConversationTranscript {
  * search_chat_history, which returns the conversation id.
  */
 export async function readConversation(
-  conversationId: string
+  conversationId: string,
+  tables: HistoryTables = CUSTOMER_TABLES
 ): Promise<ConversationTranscript | null> {
   if (!hasSupabase()) return null;
   const sb = await getSupabaseServer();
 
   const { data: conv } = await sb
-    .from("conversations")
+    .from(tables.conversations)
     .select("title")
     .eq("id", conversationId)
     .maybeSingle();
   if (!conv) return null;
 
   const { data: msgs } = await sb
-    .from("messages")
+    .from(tables.messages)
     .select("role, parts, position")
     .eq("conversation_id", conversationId)
     .order("position", { ascending: true });

@@ -53,6 +53,33 @@ vi.mock("@/lib/ai/admin/task-tools", () => ({
 
 vi.mock("@/lib/ai/admin/web-tools", () => ({ webTools: () => ({ search_web: { description: "web" }, read_page: { description: "page" } }) }));
 vi.mock("@/lib/ai/admin/file-tools", () => ({ fileTools: () => ({ create_file: { description: "file" } }) }));
+vi.mock("@/lib/ai/admin/history-tools", () => ({
+  historyTools: () => ({ search_chat_history: { description: "history" }, read_conversation: { description: "read" } }),
+}));
+vi.mock("@/lib/ai/admin/gtm-tools", () => ({
+  gtmTools: () => ({ gtm_landing: { description: "g" }, gtm_visitor: { description: "v" }, snitcher_companies: { description: "s" } }),
+}));
+vi.mock("@/lib/ai/admin/memory-tools", () => ({ memoryTools: () => ({ remember: { description: "remember", needsApproval: true } }) }));
+vi.mock("@/lib/ai/admin/rrc-sql-tools", () => ({
+  rrcSqlTools: () => ({ rrc_tables: { description: "t" }, rrc_describe: { description: "d" }, rrc_query: { description: "q" } }),
+}));
+vi.mock("@/lib/ai/rrc-tools", () => ({ rrcTools: () => ({ rrc_search: { description: "rrc" }, rrc_operator: { description: "op" } }) }));
+vi.mock("@/lib/ai/rrc/dispatch", () => ({ rrcAnalysisTool: () => ({ rrc_analyze: { description: "analyze" } }), RRC_CATALOG: "# series and decline\n- decline_fit" }));
+
+// This admin's learned state; empty unless a test gives them some.
+const loadAdminDocs = vi.fn(async () => ({ memory: "", persona: "" }));
+vi.mock("@/lib/ai/admin/memory", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/ai/admin/memory")>()),
+  loadAdminDocs: () => loadAdminDocs(),
+  loadAdminPlaybooks: async () => [],
+}));
+const reflectOnAdminTurn = vi.fn(async (_input: unknown) => ({ updated: [] }));
+vi.mock("@/lib/ai/admin/reflection", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/ai/admin/reflection")>()),
+  reflectOnAdminTurn: (input: unknown) => reflectOnAdminTurn(input),
+}));
+// `after` runs its callback once the response is done; here, at once.
+vi.mock("next/server", () => ({ after: (cb: () => unknown) => void cb() }));
 
 // The caller's Google connection; none unless a test connects one.
 const googleSettings = vi.fn(async (): Promise<unknown> => null);
@@ -87,14 +114,32 @@ describe("POST /api/admin/chat", () => {
     expect(res.status).toBe(200);
     expect(streamText).toHaveBeenCalledTimes(1);
     const call = (streamText.mock.calls[0] as unknown[])[0] as { tools: Record<string, unknown>; system: string; model: { id: string } };
-    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "add_targets", "billing_history", "business_metrics", "create_file", "create_team_task", "db_query", "draft_email", "list_customers", "list_targets", "list_team_tasks", "platform_admins", "read_page", "search_web", "support_inbox"]);
-    for (const customerTool of ["get_wells", "search_documents", "create_task", "rrc_search"]) {
+    expect(Object.keys(call.tools).sort()).toEqual(["account_labels", "add_targets", "billing_history", "business_metrics", "create_file", "create_team_task", "db_query", "draft_email", "gtm_landing", "gtm_visitor", "list_customers", "list_targets", "list_team_tasks", "platform_admins", "read_conversation", "read_page", "remember", "rrc_analyze", "rrc_describe", "rrc_operator", "rrc_query", "rrc_search", "rrc_tables", "search_chat_history", "search_web", "snitcher_companies", "support_inbox"]);
+    // The public RRC record, yes; the customer workspace's own data tools, never.
+    for (const customerTool of ["get_wells", "search_documents", "create_task", "record_production"]) {
       expect(call.tools).not.toHaveProperty(customerTool);
     }
     expect(call.system).toMatch(/people who RUN Wildcat/);
     expect(call.system).toMatch(/Sky Resources \(org o1\)/);
     expect(call.system).toMatch(/never an instruction/);
     expect(call.model.id).toBe("claude-opus-5");
+  });
+
+  it("gives the model this admin's memory and the RRC catalog, and reflects after the reply", async () => {
+    isAdmin.mockResolvedValue(true);
+    loadAdminDocs.mockResolvedValueOnce({ memory: "- Jim runs Sky Resources", persona: "- Answer in one line" });
+    await post();
+    const call = (streamText.mock.calls[0] as unknown[])[0] as {
+      system: string;
+      onFinish: (e: { usage: object; steps: unknown[]; text: string }) => void;
+    };
+    expect(call.system).toContain("- Jim runs Sky Resources");
+    expect(call.system).toContain("- Answer in one line");
+    expect(call.system).toContain("RRC analysis catalog");
+    expect(call.system).toContain("- decline_fit");
+    expect(reflectOnAdminTurn).not.toHaveBeenCalled();
+    call.onFinish({ usage: { inputTokens: 1, outputTokens: 1 }, steps: [], text: "Four customers." });
+    expect(reflectOnAdminTurn).toHaveBeenCalledWith({ userText: "How many customers?", assistantText: "Four customers." });
   });
 
   it("adds Google tools only for connected services, and none while Google needs reconnecting", async () => {

@@ -16,6 +16,15 @@ import { dbTools } from "@/lib/ai/admin/db-tools";
 import { taskTools } from "@/lib/ai/admin/task-tools";
 import { webTools } from "@/lib/ai/admin/web-tools";
 import { fileTools } from "@/lib/ai/admin/file-tools";
+import { historyTools } from "@/lib/ai/admin/history-tools";
+import { gtmTools } from "@/lib/ai/admin/gtm-tools";
+import { memoryTools } from "@/lib/ai/admin/memory-tools";
+import { rrcSqlTools } from "@/lib/ai/admin/rrc-sql-tools";
+import { loadAdminDocs, loadAdminPlaybooks, renderAdminState } from "@/lib/ai/admin/memory";
+import { latestUserText, reflectOnAdminTurn } from "@/lib/ai/admin/reflection";
+import { rrcTools } from "@/lib/ai/rrc-tools";
+import { RRC_CATALOG, rrcAnalysisTool } from "@/lib/ai/rrc/dispatch";
+import { after } from "next/server";
 import { runAsOrion } from "@/lib/admin/google/orion-guard";
 import { getGoogleSettings } from "@/lib/admin/google/settings";
 import { buildAdminSystemPrompt } from "@/lib/ai/admin/system-prompt";
@@ -66,14 +75,19 @@ export async function POST(req: Request): Promise<Response> {
   // `folderId` is the shared chat surface's project field; here it names an
   // admin project. Read through RLS, so an id that is not one comes back null
   // and the turn runs unscoped.
-  const [customers, project, google] = await Promise.all([
+  const [customers, project, google, docs, playbooks] = await Promise.all([
     listCustomers(),
     folderId ? getAdminProjectContext(folderId) : Promise.resolve(null),
     getGoogleSettings(),
+    loadAdminDocs(),
+    loadAdminPlaybooks(),
   ]);
   // The caller's own Google, read only, for the services they connected.
   const connected = google && !google.needsReauth ? google.services : [];
-  const system = buildAdminSystemPrompt(customers, new Date(), project ?? undefined);
+  const system = buildAdminSystemPrompt(customers, new Date(), project ?? undefined, {
+    state: renderAdminState(docs, playbooks),
+    rrcCatalog: RRC_CATALOG,
+  });
 
   // Where the user is rides the CURRENT user turn, not the system prompt: it
   // changes on every navigation, and in `system` it would break the cached
@@ -94,13 +108,21 @@ export async function POST(req: Request): Promise<Response> {
         read: "Use it to read a result in full before quoting it.",
       }),
       ...fileTools(),
+      ...historyTools(),
+      ...gtmTools(),
+      ...memoryTools(),
+      // The Texas RRC record: the customer Orion's RRC tools and analysis
+      // catalog, plus free read-only SQL over the whole mirror.
+      ...rrcTools(),
+      ...rrcAnalysisTool(),
+      ...rrcSqlTools(),
     }),
     // Business questions are a tool call and a sentence; the thinking phase
     // is what costs the wall clock here (see CLAUDE.md on Opus 5 effort).
     providerOptions: { anthropic: { effort: "medium", cacheControl: { type: "ephemeral" } } },
     stopWhen: stepCountIs(MAX_STEPS),
     experimental_transform: smoothStream({ delayInMs: SMOOTH_DELAY_MS, chunking: smoothChunk }),
-    onFinish: ({ usage, steps }) => {
+    onFinish: ({ usage, steps, text }) => {
       console.info("admin-orion:turn", {
         turnId,
         steps: steps.length,
@@ -108,6 +130,11 @@ export async function POST(req: Request): Promise<Response> {
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
       });
+      // The learning loop: after the reply has gone, decide whether this
+      // exchange taught anything durable (memory, persona, a playbook). Off
+      // the response path, and it swallows its own failures.
+      const userText = latestUserText(messages);
+      after(() => reflectOnAdminTurn({ userText, assistantText: text }));
     },
   });
 

@@ -33,6 +33,7 @@ export function SortableTable<T>({
   columns,
   rowKey,
   defaultSort,
+  defaultDirection = "desc",
   empty,
   onRowClick,
 }: {
@@ -40,12 +41,13 @@ export function SortableTable<T>({
   columns: SortColumn<T>[];
   rowKey: (row: T) => string;
   defaultSort: string;
+  defaultDirection?: "asc" | "desc";
   empty: string;
   /** Makes each row open something (a detail panel); the row reads as clickable. */
   onRowClick?: (row: T) => void;
 }) {
   const [sortKey, setSortKey] = useState(defaultSort);
-  const [direction, setDirection] = useState<"asc" | "desc">("desc");
+  const [direction, setDirection] = useState<"asc" | "desc">(defaultDirection);
 
   function toggleSort(key: string) {
     if (key === sortKey) setDirection((d) => (d === "desc" ? "asc" : "desc"));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent } from "react";
 import {
   PlusIcon,
   PaperclipIcon,
@@ -221,6 +221,15 @@ export function OrionChat({
   const [kbOpen, setKbOpen] = useState(false);
   const [greeting, setGreeting] = useState<string | null>(null);
   const speech = useSpeech();
+  // One stable toggle for every message, so a finished message's props do not
+  // change when the composer or the streaming reply re-renders the chat. The
+  // ref holds the current `speech`; reading it at click time is what a stale
+  // closure would get wrong.
+  const speechRef = useRef(speech);
+  useEffect(() => {
+    speechRef.current = speech;
+  });
+  const toggleSpeech = useCallback((id: string, text: string) => speechRef.current.toggle(id, text), []);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const bottomSpacerRef = useRef<HTMLDivElement>(null);
@@ -697,15 +706,14 @@ export function OrionChat({
                   m.role === "assistant" &&
                   status === "streaming"
                 }
-                speech={
+                speechState={
                   m.role === "assistant" && hasText(m)
-                    ? {
-                        state:
-                          speech.activeId === m.id ? speech.state : "idle",
-                        onToggle: (text) => speech.toggle(m.id, text),
-                      }
+                    ? speech.activeId === m.id
+                      ? speech.state
+                      : "idle"
                     : undefined
                 }
+                onSpeechToggle={toggleSpeech}
               />
               {pendingApprovals(m).map((req) => (
                 <ApprovalCard
@@ -907,21 +915,47 @@ function GlideText({ text }: { text: string }) {
   );
 }
 
-function MessageBubble({
+/**
+ * A finished message's markdown, parsed once per text. Parsing (react-markdown
+ * + GFM) is the cost of a message, and an unchanged block must not pay it again
+ * because something else on the page re-rendered.
+ */
+const Markdown = memo(function Markdown({ text }: { text: string }) {
+  return (
+    <div className={CHAT_BODY_CLASS}>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+    </div>
+  );
+});
+
+/**
+ * Memoized, with props kept stable by the parent: a long chat re-rendered every
+ * message, re-parsing all their markdown, on each keystroke and each streamed
+ * chunk, so typing and the reply slowed in proportion to the chat's length. A
+ * finished message's message object, time and read-aloud state do not change
+ * while you type or while another message streams, so it now skips the render.
+ */
+const MessageBubble = memo(function MessageBubble({
   role,
   message,
-  speech,
+  speechState,
+  onSpeechToggle,
   streaming = false,
   at,
 }: {
   role: string;
   message: UIMessage;
-  speech?: SpeechControl;
+  /** Read-aloud state, for an assistant message with text; undefined hides the control. */
+  speechState?: SpeechState;
+  onSpeechToggle: (id: string, text: string) => void;
   /** True only for the assistant message currently being generated. */
   streaming?: boolean;
   /** When this message was written. See `useMessageTimes`. */
   at?: number;
 }) {
+  const speech: SpeechControl | undefined = speechState
+    ? { state: speechState, onToggle: (text) => onSpeechToggle(message.id, text) }
+    : undefined;
   const isUser = role === "user";
   const { text, attachments } = splitAttachments(message);
   // Assistant turns render as ordered blocks (text ⇄ chart). `text` stays the
@@ -961,9 +995,7 @@ function MessageBubble({
         ? text && (
             // User: a gray bubble (the treatment AI messages used to have).
             <div className="max-w-[85%] rounded-2xl bg-background-subtle px-3.5 py-2 text-primary-text">
-              <div className={CHAT_BODY_CLASS}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-              </div>
+              <Markdown text={text} />
             </div>
           )
         : // AI: text and charts INTERLEAVED in the order Orion produced them, so
@@ -1009,11 +1041,7 @@ function MessageBubble({
                 {streaming && i === blocks.length - 1 ? (
                   <GlideText text={block.text} />
                 ) : (
-                  <div className={CHAT_BODY_CLASS}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {block.text}
-                    </ReactMarkdown>
-                  </div>
+                  <Markdown text={block.text} />
                 )}
               </motion.div>
             )
@@ -1046,7 +1074,7 @@ function MessageBubble({
       )}
     </div>
   );
-}
+});
 
 /** Copy an assistant response to the clipboard, with a brief confirmation. */
 function CopyButton({ text }: { text: string }) {

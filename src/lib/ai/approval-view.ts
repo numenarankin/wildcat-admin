@@ -12,6 +12,7 @@
 
 /** Plain-English action title for a single-record write, keyed by tool name. */
 export const ACTION_TITLES: Record<string, string> = {
+  remember: "Remember this",
   add_well_comment: "Post a field note",
   create_task: "Create a task",
   update_task: "Update a task",

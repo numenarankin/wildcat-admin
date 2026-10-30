@@ -47,6 +47,8 @@ export interface GoogleEvent {
   id: string;
   etag: string;
   status?: "confirmed" | "tentative" | "cancelled";
+  /** "transparent" = shown as Free. */
+  transparency?: "opaque" | "transparent";
   summary?: string;
   description?: string;
   location?: string;

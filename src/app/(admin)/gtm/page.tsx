@@ -1,6 +1,7 @@
 import { requireAdminPage } from "@/lib/auth/platform-admin";
 import { hasGtmDb } from "@/lib/admin/gtm/db";
 import { readLanding } from "@/lib/admin/gtm/read";
+import { readBookings } from "@/lib/admin/booking/read";
 import { GtmWorkspace } from "@/components/admin/gtm/gtm-workspace";
 
 export const metadata = { title: "GTM" };
@@ -20,5 +21,6 @@ export default async function AdminGtmPage() {
       </div>
     );
   }
-  return <GtmWorkspace initial={await readLanding({ days: 30 })} />;
+  const [initial, bookings] = await Promise.all([readLanding({ days: 30 }), readBookings()]);
+  return <GtmWorkspace initial={initial} bookings={bookings} />;
 }

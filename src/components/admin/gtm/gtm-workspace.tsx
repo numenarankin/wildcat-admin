@@ -10,14 +10,10 @@ import { VisitorPanel } from "@/components/admin/gtm/visitor-panel";
 import { VisitorsMap } from "@/components/admin/gtm/visitors-map";
 import { getLandingData, getLandingMap } from "@/lib/admin/gtm/actions";
 import { count, demoName, fmtDateTime, fmtDuration, pageName, percent } from "@/lib/admin/gtm/format";
-import type { BookingListRow } from "@/lib/admin/booking/read";
 import type { DemoTableRow, GtmRange, LandingData, MapPoint, VisitorTableRow } from "@/lib/admin/gtm/types";
 
-type Tab = "landing" | "bookings";
-const TABS: ReadonlyArray<{ id: Tab; label: string }> = [
-  { id: "landing", label: "Landing" },
-  { id: "bookings", label: "Bookings" },
-];
+type Tab = "landing";
+const TABS: ReadonlyArray<{ id: Tab; label: string }> = [{ id: "landing", label: "Landing" }];
 
 type View = "visitors" | "map" | "demos";
 const VIEWS: ReadonlyArray<{ value: View; label: string }> = [
@@ -90,31 +86,6 @@ const VISITOR_COLUMNS: SortColumn<VisitorTableRow>[] = [
   { key: "lastSeen", label: "Last seen", numeric: true, sortValue: (r) => r.lastSeenAt, cell: (r) => fmtDateTime(r.lastSeenAt) },
 ];
 
-/** Demos are on-site in Central time, so they read in Central whatever the viewer's zone. */
-const centralTime = new Intl.DateTimeFormat("en-US", {
-  timeZone: "America/Chicago",
-  weekday: "short",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
-
-const BOOKING_COLUMNS: SortColumn<BookingListRow>[] = [
-  { key: "when", label: "When (Central)", numeric: false, sortValue: (r) => r.startsAt, cell: (r) => centralTime.format(new Date(r.startsAt)), className: "font-medium" },
-  { key: "company", label: "Company", numeric: false, sortValue: (r) => r.company, cell: (r) => r.company },
-  { key: "name", label: "Contact", numeric: false, sortValue: (r) => r.name, cell: (r) => `${r.name} · ${r.email}`, className: "text-muted-foreground" },
-  { key: "address", label: "Office", numeric: false, sortValue: (r) => r.address, cell: (r) => r.address, className: "text-muted-foreground" },
-  {
-    key: "calendar",
-    label: "Calendar",
-    numeric: false,
-    sortValue: (r) => (r.onCalendar ? 1 : 0),
-    cell: (r) => (r.onCalendar ? "On calendar" : <span className="text-destructive">Not on calendar</span>),
-  },
-  { key: "notes", label: "Notes", numeric: false, sortValue: (r) => r.notes ?? "", cell: (r) => r.notes ?? "", className: "text-muted-foreground" },
-];
-
 const DEMO_COLUMNS: SortColumn<DemoTableRow>[] = [
   { key: "demo", label: "Demo", numeric: false, sortValue: (r) => demoName(r.demo), cell: (r) => demoName(r.demo), className: "font-medium" },
   { key: "page", label: "Page", numeric: false, sortValue: (r) => r.path, cell: (r) => pageName(r.path), className: "text-muted-foreground" },
@@ -172,7 +143,7 @@ function useMapPoints(enabled: boolean, range: GtmRange | null) {
  * Recon's View selector swaps the area under its bar. The map keeps its own
  * range, defaulting to the last 7 days.
  */
-export function GtmWorkspace({ initial, bookings }: { initial: LandingData; bookings: BookingListRow[] }) {
+export function GtmWorkspace({ initial }: { initial: LandingData }) {
   const [tab, setTab] = useState<Tab>("landing");
   const [days, setDays] = useState<Preset>(30);
   const [data, setData] = useState(initial);
@@ -226,13 +197,6 @@ export function GtmWorkspace({ initial, bookings }: { initial: LandingData; book
         ))}
       </div>
 
-      {tab === "bookings" && (
-        <div className="min-h-0 flex-1 px-1 pb-2">
-          <SortableTable rows={bookings} columns={BOOKING_COLUMNS} rowKey={(r) => r.id} defaultSort="when" defaultDirection="asc" empty="No demos booked." />
-        </div>
-      )}
-
-      {tab === "landing" && (
       <div className="flex min-h-0 flex-1 flex-col gap-4 px-1 pb-2">
         <div className="flex flex-wrap items-center gap-3">
           <PresetToggle value={days} onChange={(d) => d !== "custom" && changeDays(d)} label="Range" />
@@ -303,7 +267,6 @@ export function GtmWorkspace({ initial, bookings }: { initial: LandingData; book
           )}
         </div>
       </div>
-      )}
 
       <VisitorPanel visitorId={visitorId} onClose={() => setVisitorId(null)} />
     </div>

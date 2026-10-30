@@ -114,7 +114,7 @@ export function SortableTable<T>({
             sorted.map((row) => (
               <TableRow
                 key={rowKey(row)}
-                className={cn("[&>td]:py-3.5", onRowClick && "cursor-pointer")}
+                className={cn("group [&>td]:py-3.5", onRowClick && "cursor-pointer")}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
               >
                 {columns.map((col) => (

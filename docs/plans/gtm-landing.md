@@ -18,9 +18,11 @@ Needs, before it works for real:
   optionally `SNITCHER_WORKSPACE_UUID`; `CRON_SECRET` is already there;
 - in Snitcher: an Automation sending "Session started" (and new company /
   company returns) to that webhook;
-- one real delivery to confirm the webhook's session and company ids are the
-  UUIDs the API returns, and that `setAnonymousId` lands before Snitcher's
-  first pageview (else the visitor join misses the first visit).
+- the webhook payload does not match Snitcher's docs (seen 2026-10-30: a
+  `new_session` event with a `subjects` list, no session id, the company's
+  uuid only inside a dashboard link). Every delivery is kept raw in
+  `snitcher_deliveries` (migration `2026103100100`) until the parser is
+  rewritten to the real shape.
 
 Where it lives. Landing: `src/lib/track/` (config, tracker, geo, types),
 `src/app/api/track/route.ts`, `src/components/analytics/{tracker,snitcher-tracker}.tsx`,
@@ -114,9 +116,12 @@ malformed batches, and limits each IP to a fixed number of batches a minute.
 posts to a public route in admin, `/api/gtm/snitcher`, which verifies the
 HMAC-SHA256 `Signature` header against the webhook secret, upserts the
 company, and stores the delivery once by Snitcher's session id (Snitcher
-retries up to five times). The tracker sets Snitcher's anonymous id to our
-visitor id (`setAnonymousId`), so Snitcher's `visitor_uuid` is our
-`visitors.id`; the location read links the company to that visitor and the
+retries up to five times). Snitcher's tracker ignores `setAnonymousId`, so
+our tracker instead reads the id Snitcher's script stores in the browser
+(`radar_device_id`) and sends it with every batch; it lands on
+`visitors.snitcher_visitor_id` (migration `2026103100200`). That is the
+`visitor_uuid` on every Snitcher session, so the location read links the
+company to that visitor and the
 Snitcher session to our visit that started within 30 minutes of it, and
 through it the company joins to
 the visitor and everything they did. The webhook location is the company's

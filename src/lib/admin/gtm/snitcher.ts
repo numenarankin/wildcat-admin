@@ -137,9 +137,9 @@ export type LocationResult = "located" | "no-token" | "not-found" | "failed";
  * Snitcher's session location and visitor id, from its REST API. There is no
  * single-session endpoint, so the company's sessions around the session's
  * date are listed and matched by id. On a match the row gets the location
- * and `location_fetched_at`; the visitor id (our own, handed to Snitcher by
- * the tracker) links the company to our visitor and the Snitcher session to
- * our visit. Without a match the row is left for the sweep to try again.
+ * and `location_fetched_at`; Snitcher's visitor id, which our tracker keeps on
+ * the visitor row, links the company to our visitor and the Snitcher session
+ * to our visit. Without a match the row is left for the sweep to try again.
  */
 export async function fetchSessionLocation(db: SupabaseClient, sessionUuid: string): Promise<LocationResult> {
   const token = process.env.SNITCHER_API_TOKEN;
@@ -186,9 +186,16 @@ export async function fetchSessionLocation(db: SupabaseClient, sessionUuid: stri
     location_fetched_at: new Date().toISOString(),
   };
 
-  // The visitor id is ours when our tracker ran in that browser.
+  // Snitcher's visitor id, which our tracker reads off the page and keeps on
+  // our visitor row (`snitcher_visitor_id`) wherever both scripts ran.
   if (match.visitor_uuid) {
-    const { data: visitor } = await db.from("visitors").select("id").eq("id", match.visitor_uuid).maybeSingle();
+    const { data: visitor } = await db
+      .from("visitors")
+      .select("id")
+      .eq("snitcher_visitor_id", match.visitor_uuid)
+      .order("last_seen_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (visitor) {
       await db.from("visitors").update({ company_id: row.company_id }).eq("id", visitor.id);
       const started = Date.parse(match.started_at ?? at);

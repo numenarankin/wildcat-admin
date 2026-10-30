@@ -1,8 +1,29 @@
 # Demo booking
 
-Status: PLAN (2026-10-30). The landing's `/book` widget is built as UI only
-(`wildcatiq-landing/src/components/book/booking-widget.tsx`). Nothing below is
-built.
+Status: BUILT (2026-10-30), not yet live. Verified offline: the slot rules,
+Mapbox batching, busy list, confirm path and admin routes by hand-oracle vitest
+(`src/lib/admin/booking/*.test.ts`, `src/app/api/gtm/booking/routes.test.ts`);
+the migration and `book_demo` on a throwaway Postgres (overlap, stale check,
+Central day, six concurrent bookings for one slot land one); the landing relay
+by a script with admin stubbed. Not seen in a browser; no real Google or
+Mapbox call has run.
+
+Needs, before it works for real:
+- migration `supabase/migrations/2026103000200_demo_bookings.sql` pushed to the
+  GTM project (the user pushes);
+- admin: `BOOKING_API_SECRET`, `BOOKING_CALENDAR_USER_ID` (the owner's admin
+  user id, with Calendar connected under Settings), `MAPBOX_SECRET_TOKEN`
+  (already set) allowed to use Geocoding v6 and the Matrix API;
+- landing: `BOOKING_ADMIN_URL` (admin's origin), `BOOKING_API_SECRET` (same
+  value), `NEXT_PUBLIC_MAPBOX_TOKEN` (already set) allowed to use Search Box;
+- one real booking, as in "Before it goes live" below.
+
+Built as written with these choices on the open questions: the widget shows
+2h and the end time two hours on; an event with no location counts as home;
+no limit on the first drive; the drive home is ignored. Busy reads the
+owner's primary calendar only (not other calendars on their list). The
+end-to-end test through both apps' running servers was not done (no dev
+servers started); the relay and admin routes were each tested against stubs.
 
 ## Goal
 

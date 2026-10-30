@@ -56,7 +56,7 @@ describe("busyForVisitor", () => {
   let calls: string[];
 
   beforeEach(() => {
-    process.env.MAPBOX_SECRET_TOKEN = "tok";
+    process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "tok";
     clearGeocodeCache();
     calls = [];
     vi.stubGlobal(

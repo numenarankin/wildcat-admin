@@ -12,8 +12,8 @@ Needs, before it works for real:
 - migration `supabase/migrations/2026103000200_demo_bookings.sql` pushed to the
   GTM project (the user pushes);
 - admin: `BOOKING_API_SECRET`, `BOOKING_CALENDAR_USER_ID` (the owner's admin
-  user id, with Calendar connected under Settings), `MAPBOX_SECRET_TOKEN`
-  (already set) allowed to use Geocoding v6 and the Matrix API;
+  user id, with Calendar connected under Settings), `NEXT_PUBLIC_MAPBOX_TOKEN` (already set; the secret token is
+  scoped to downloads and Mapbox refuses it for geocoding and the matrix);
 - landing: `BOOKING_ADMIN_URL` (admin's origin), `BOOKING_API_SECRET` (same
   value), `NEXT_PUBLIC_MAPBOX_TOKEN` (already set) allowed to use Search Box;
 - one real booking, as in "Before it goes live" below.
@@ -86,7 +86,7 @@ landing /book ──> landing /api/book/{availability,confirm}
 admin /api/gtm/booking/{availability,confirm}
    ├── GTM db: demo_bookings
    ├── Google Calendar (owner's connection, BOOKING_CALENDAR_USER_ID)
-   └── Mapbox geocoding + matrix (MAPBOX_SECRET_TOKEN)
+   └── Mapbox geocoding + matrix (NEXT_PUBLIC_MAPBOX_TOKEN)
 ```
 
 - **availability** `{ address, lat?, lng? }` → `{ place, days: { date, slots[] }[] }`,

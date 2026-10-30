@@ -14,9 +14,10 @@ export interface Point {
 /** The Matrix API's driving profile takes at most 25 coordinates a request. */
 export const MATRIX_MAX = 25;
 
+/** The public token: MAPBOX_SECRET_TOKEN is scoped to downloads and Mapbox refuses it here (403). */
 function token(): string {
-  const t = process.env.MAPBOX_SECRET_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  if (!t) throw new Error("Mapbox not configured: set MAPBOX_SECRET_TOKEN");
+  const t = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  if (!t) throw new Error("Mapbox not configured: set NEXT_PUBLIC_MAPBOX_TOKEN");
   return t;
 }
 

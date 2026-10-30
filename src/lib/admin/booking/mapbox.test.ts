@@ -4,7 +4,7 @@ import { MATRIX_MAX, clearGeocodeCache, driveTimes, geocode } from "./mapbox";
 const requests: URL[] = [];
 
 beforeEach(() => {
-  process.env.MAPBOX_SECRET_TOKEN = "tok";
+  process.env.NEXT_PUBLIC_MAPBOX_TOKEN = "tok";
   clearGeocodeCache();
   requests.length = 0;
 });

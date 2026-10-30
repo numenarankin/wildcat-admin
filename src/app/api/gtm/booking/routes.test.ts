@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const readBusy = vi.fn();
-const createBookingEvent = vi.fn();
-vi.mock("@/lib/admin/booking/calendar", () => ({ readBusy, createBookingEvent }));
+const handleNewBooking = vi.fn();
+vi.mock("@/lib/admin/booking/calendar", () => ({ readBusy, handleNewBooking }));
 
 const { POST: busyPOST } = await import("./busy/route");
-const { POST: eventPOST } = await import("./event/route");
+const { POST: eventPOST } = await import("./booked/route");
 
 const req = (body: unknown, auth: string | null = "Bearer s3cret") =>
   new Request("http://admin/api", {
@@ -29,7 +29,7 @@ describe("booking routes", () => {
     delete process.env.BOOKING_API_SECRET;
     expect((await busyPOST(req(range))).status).toBe(503);
     expect(readBusy).not.toHaveBeenCalled();
-    expect(createBookingEvent).not.toHaveBeenCalled();
+    expect(handleNewBooking).not.toHaveBeenCalled();
   });
 
   it("read the busy events for a range", async () => {
@@ -38,11 +38,11 @@ describe("booking routes", () => {
     expect(readBusy).toHaveBeenCalledWith(range.timeMin, range.timeMax);
   });
 
-  it("create an event only for a booking id", async () => {
+  it("hand a new booking over only by its id", async () => {
     expect((await eventPOST(req({ bookingId: "not-a-uuid" }))).status).toBe(400);
     const id = crypto.randomUUID();
-    createBookingEvent.mockResolvedValue({ eventId: "g1" });
-    expect(await (await eventPOST(req({ bookingId: id }))).json()).toEqual({ eventId: "g1" });
-    expect(createBookingEvent).toHaveBeenCalledWith(id);
+    handleNewBooking.mockResolvedValue({ calendar: true, email: true });
+    expect(await (await eventPOST(req({ bookingId: id }))).json()).toEqual({ calendar: true, email: true });
+    expect(handleNewBooking).toHaveBeenCalledWith(id);
   });
 });

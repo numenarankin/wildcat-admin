@@ -2,12 +2,14 @@ import "server-only";
 import { getGtmDb } from "@/lib/admin/gtm/db";
 import { insertEvent, listEvents } from "@/lib/admin/google/calendar/client";
 import type { GoogleEvent, GoogleEventInput } from "@/lib/admin/google/calendar/types";
+import { sendBookingEmail } from "@/lib/admin/booking/emails";
 
 /**
  * The owner's Google Calendar, for the landing's demo booking
  * (docs/plans/demo-booking.md). The landing works out open slots itself; it
  * comes here only for what needs the owner's Google login: the busy events,
- * and the event for a new booking.
+ * and, for a new booking, the owner's calendar event and the visitor's
+ * confirmation from the owner's Gmail.
  */
 
 const ZONE = "America/Chicago";
@@ -73,12 +75,14 @@ export function eventFor(b: BookingRow): GoogleEventInput {
 }
 
 /**
- * Puts a confirmed booking on the owner's calendar: the 30 minutes on paper,
- * with no guests, so Google emails nobody (the landing's Brevo confirmation
- * carries the visitor's invite). Reads the row itself, so the caller can only name a
- * booking, not shape the event. Once only: a booking with an event is left alone.
+ * A booking the landing just wrote: puts it on the owner's calendar (the 30
+ * minutes on paper, no guests, so Google Calendar emails nobody) and sends the
+ * visitor's confirmation, with its calendar file, from the owner's Gmail.
+ * Reads the row itself, so the caller can only name a booking, not shape the
+ * event or the email. A booking that already has an event was handled before
+ * and is left alone, so a repeat call sends nothing twice.
  */
-export async function createBookingEvent(bookingId: string): Promise<{ eventId: string }> {
+export async function handleNewBooking(bookingId: string): Promise<{ calendar: boolean; email: boolean }> {
   const db = getGtmDb();
   const { data, error } = await db
     .from("demo_bookings")
@@ -88,10 +92,19 @@ export async function createBookingEvent(bookingId: string): Promise<{ eventId: 
   if (error) throw new Error(`Booking read failed: ${error.message}`);
   const row = data as BookingRow | null;
   if (!row || row.status !== "confirmed") throw new Error("No such booking.");
-  if (row.google_event_id) return { eventId: row.google_event_id };
+  if (row.google_event_id) return { calendar: true, email: true };
 
-  const event = await insertEvent(calendarUserId(), "primary", eventFor(row));
-  const { error: saveErr } = await db.from("demo_bookings").update({ google_event_id: event.id }).eq("id", bookingId);
-  if (saveErr) console.error("[booking] event id not saved", bookingId, saveErr.message);
-  return { eventId: event.id };
+  const owner = calendarUserId();
+  const [event, email] = await Promise.allSettled([
+    insertEvent(owner, "primary", eventFor(row)),
+    sendBookingEmail(owner, bookingId, row, "REQUEST"),
+  ]);
+  if (email.status === "rejected") console.error("[booking] confirmation email failed", bookingId, email.reason);
+  if (event.status === "rejected") {
+    console.error("[booking] calendar event failed", bookingId, event.reason);
+  } else {
+    const { error: saveErr } = await db.from("demo_bookings").update({ google_event_id: event.value.id }).eq("id", bookingId);
+    if (saveErr) console.error("[booking] event id not saved", bookingId, saveErr.message);
+  }
+  return { calendar: event.status === "fulfilled", email: email.status === "fulfilled" };
 }

@@ -4,6 +4,7 @@ import type { GoogleEvent } from "@/lib/admin/google/calendar/types";
 const maybeSingle = vi.fn();
 const updates: unknown[] = [];
 const insertEvent = vi.fn();
+const sendBookingEmail = vi.fn();
 
 vi.mock("@/lib/admin/gtm/db", () => ({
   getGtmDb: () => ({
@@ -14,8 +15,9 @@ vi.mock("@/lib/admin/gtm/db", () => ({
   }),
 }));
 vi.mock("@/lib/admin/google/calendar/client", () => ({ insertEvent, listEvents: vi.fn() }));
+vi.mock("@/lib/admin/booking/emails", () => ({ sendBookingEmail }));
 
-const { busyEvents, createBookingEvent, eventFor } = await import("./calendar");
+const { busyEvents, handleNewBooking, eventFor } = await import("./calendar");
 
 process.env.BOOKING_CALENDAR_USER_ID = "owner";
 
@@ -62,26 +64,38 @@ describe("busyEvents", () => {
   });
 });
 
-describe("createBookingEvent", () => {
-  it("puts the booking on the calendar and saves the event id", async () => {
+describe("handleNewBooking", () => {
+  it("puts the booking on the calendar, saves the event id, and emails the confirmation from the owner's Gmail", async () => {
     maybeSingle.mockResolvedValue({ data: row, error: null });
     insertEvent.mockResolvedValue({ id: "g1" });
-    expect(await createBookingEvent("b1")).toEqual({ eventId: "g1" });
+    sendBookingEmail.mockResolvedValue(undefined);
+    expect(await handleNewBooking("b1")).toEqual({ calendar: true, email: true });
     expect(insertEvent).toHaveBeenCalledWith("owner", "primary", eventFor(row));
+    expect(sendBookingEmail).toHaveBeenCalledWith("owner", "b1", row, "REQUEST");
     expect(updates).toEqual([{ google_event_id: "g1" }]);
   });
 
-  it("leaves a booking that already has an event alone", async () => {
+  it("reports each half that failed without losing the other", async () => {
+    maybeSingle.mockResolvedValue({ data: row, error: null });
+    insertEvent.mockResolvedValue({ id: "g1" });
+    sendBookingEmail.mockRejectedValue(new Error("Gmail down"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(await handleNewBooking("b1")).toEqual({ calendar: true, email: false });
+    expect(updates).toEqual([{ google_event_id: "g1" }]);
+  });
+
+  it("leaves a booking that was already handled alone, sending nothing twice", async () => {
     maybeSingle.mockResolvedValue({ data: { ...row, google_event_id: "g0" }, error: null });
-    expect(await createBookingEvent("b1")).toEqual({ eventId: "g0" });
+    expect(await handleNewBooking("b1")).toEqual({ calendar: true, email: true });
     expect(insertEvent).not.toHaveBeenCalled();
+    expect(sendBookingEmail).not.toHaveBeenCalled();
   });
 
   it("refuses a missing or cancelled booking", async () => {
     maybeSingle.mockResolvedValue({ data: { ...row, status: "cancelled" }, error: null });
-    await expect(createBookingEvent("b1")).rejects.toThrow(/No such booking/);
+    await expect(handleNewBooking("b1")).rejects.toThrow(/No such booking/);
     maybeSingle.mockResolvedValue({ data: null, error: null });
-    await expect(createBookingEvent("b1")).rejects.toThrow(/No such booking/);
+    await expect(handleNewBooking("b1")).rejects.toThrow(/No such booking/);
   });
 });
 

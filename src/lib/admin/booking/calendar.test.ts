@@ -33,7 +33,7 @@ const row = {
   company: "Acme Oil",
   office_address: "1 Main St, Midland, TX",
   starts_at: "2026-11-02T16:00:00+00:00",
-  ends_at: "2026-11-02T18:00:00+00:00",
+  ends_at: "2026-11-02T16:30:00+00:00",
   notes: " Bring the pumper. ",
   status: "confirmed",
   google_event_id: null as string | null,
@@ -63,7 +63,7 @@ describe("busyEvents", () => {
 });
 
 describe("createBookingEvent", () => {
-  it("puts the booking on the calendar with the visitor invited, and saves the event id", async () => {
+  it("puts the booking on the calendar and saves the event id", async () => {
     maybeSingle.mockResolvedValue({ data: row, error: null });
     insertEvent.mockResolvedValue({ id: "g1" });
     expect(await createBookingEvent("b1")).toEqual({ eventId: "g1" });
@@ -86,14 +86,13 @@ describe("createBookingEvent", () => {
 });
 
 describe("eventFor", () => {
-  it("titles with the company, places at the office, two hours in Central", () => {
+  it("titles with the company, places at the office, 30 minutes, no guests (Google emails nobody)", () => {
     expect(eventFor(row)).toEqual({
       summary: "WildcatIQ demo: Acme Oil",
       location: "1 Main St, Midland, TX",
       description: "Name: Jo Field\nEmail: jo@acme.com\nCompany: Acme Oil\n\nNotes:\nBring the pumper.",
       start: { dateTime: "2026-11-02T16:00:00.000Z", timeZone: "America/Chicago" },
-      end: { dateTime: "2026-11-02T18:00:00.000Z", timeZone: "America/Chicago" },
-      attendees: [{ email: "jo@acme.com", displayName: "Jo Field" }],
+      end: { dateTime: "2026-11-02T16:30:00.000Z", timeZone: "America/Chicago" },
     });
   });
 });

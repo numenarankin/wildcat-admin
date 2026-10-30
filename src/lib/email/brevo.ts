@@ -50,6 +50,8 @@ export interface SendEmailInput {
   replyTo?: EmailRecipient;
   /** Optional attachments (e.g. the rendered digest PDF). */
   attachments?: EmailAttachment[];
+  /** Send from this address instead of BREVO_SENDER_EMAIL (it must be verified in Brevo). */
+  sender?: EmailRecipient;
 }
 
 /** Whether transactional email is configured (key + verified sender address). */
@@ -66,8 +68,8 @@ export async function sendBrevoEmail(
   input: SendEmailInput
 ): Promise<{ messageId: string }> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_SENDER_EMAIL;
-  const senderName = process.env.BREVO_SENDER_NAME?.trim() || DEFAULT_SENDER_NAME;
+  const senderEmail = input.sender?.email ?? process.env.BREVO_SENDER_EMAIL;
+  const senderName = input.sender?.name ?? (process.env.BREVO_SENDER_NAME?.trim() || DEFAULT_SENDER_NAME);
 
   if (!apiKey || !senderEmail) {
     throw new Error(

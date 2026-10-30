@@ -40,8 +40,8 @@ All times are Central (`America/Chicago`, DST-aware).
 | Rule | Value |
 |---|---|
 | Days | Monday, Wednesday from 1:30pm, Thursday, Friday |
-| Slot starts | Every 30 minutes, first 9:00am, last 4:00pm (Wednesday 1:30pm to 4:00pm) |
-| Meeting length | 2 hours, blocked on the calendar |
+| Slot starts | Every 30 minutes, first 9:00am, last 4:00pm (Wednesday 1:30pm to 4:00pm); none from 11:30am through 1:00pm |
+| Meeting length | 30 minutes on paper (widget, email, calendar file, owner's event); each booking holds the owner 2 hours (`hold_ends_at`) so it can run long, and scheduling checks the hold |
 | Buffer | 30 minutes after every meeting, before driving |
 | Day start | The owner leaves from 805 Secretariat Trail, Keller, TX |
 | Busy | Every Google Calendar event that is not marked Free, plus every confirmed booking |
@@ -92,8 +92,13 @@ admin /bookings: the table, hover to Cancel (marks cancelled, deletes the event,
 - **availability** `{ address, lat?, lng? }` → `{ place, days }`, or
   `{ error: "address" }` (no match) / `{ error: "texas" }` (outside Texas).
   Coordinates from a picked suggestion are checked by reverse geocoding.
-- **confirm** re-checks the slot, books through `book_demo`, then asks admin
-  to create the event. A failed event leaves the booking "Not on calendar".
+- **confirm** re-checks the slot, books through `book_demo`, asks admin to
+  create the owner's 30-minute event (no guests, so Google emails nobody), and
+  sends the visitor a Brevo confirmation with an .ics (UID = booking id). A
+  failed event leaves the booking "Not on calendar". Cancel on /bookings sends
+  a Brevo cancellation with a METHOD:CANCEL .ics. Migration
+  `2026103000300_demo_booking_hold.sql` adds `hold_ends_at` and the new
+  `book_demo` signature.
 - Demos are in Texas only; suggestions are bounded to Texas. The first meeting
   of a day is open from the day's first slot wherever in Texas the office is.
 

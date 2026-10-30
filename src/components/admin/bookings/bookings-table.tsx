@@ -76,8 +76,12 @@ export function BookingsTable({ bookings }: { bookings: BookingListRow[] }) {
           if (!target) return;
           startTransition(async () => {
             try {
-              const { calendar } = await cancelBookingAction(target.id);
-              setError(calendar ? null : "Cancelled, but the Google event could not be deleted. Remove it from the calendar by hand.");
+              const { calendar, email } = await cancelBookingAction(target.id);
+              const misses = [
+                !email && `the cancellation email to ${target.email} did not send`,
+                !calendar && "the Google event could not be deleted",
+              ].filter(Boolean);
+              setError(misses.length ? `Cancelled, but ${misses.join(" and ")}.` : null);
             } catch (err) {
               setError(err instanceof Error ? err.message : "Could not cancel that booking.");
             }

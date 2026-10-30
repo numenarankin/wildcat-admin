@@ -69,13 +69,13 @@ export function eventFor(b: BookingRow): GoogleEventInput {
       .join("\n"),
     start: { dateTime: new Date(b.starts_at).toISOString(), timeZone: ZONE },
     end: { dateTime: new Date(b.ends_at).toISOString(), timeZone: ZONE },
-    attendees: [{ email: b.email, displayName: b.name }],
   };
 }
 
 /**
- * Puts a confirmed booking on the owner's calendar with the visitor invited
- * (Google emails them). Reads the row itself, so the caller can only name a
+ * Puts a confirmed booking on the owner's calendar: the 30 minutes on paper,
+ * with no guests, so Google emails nobody (the landing's Brevo confirmation
+ * carries the visitor's invite). Reads the row itself, so the caller can only name a
  * booking, not shape the event. Once only: a booking with an event is left alone.
  */
 export async function createBookingEvent(bookingId: string): Promise<{ eventId: string }> {

@@ -15,7 +15,7 @@ vi.mock("@/lib/admin/gtm/db", () => ({
     }),
   }),
 }));
-vi.mock("@/lib/admin/booking/availability", () => ({ calendarUserId: () => "owner" }));
+vi.mock("@/lib/admin/booking/calendar", () => ({ calendarUserId: () => "owner" }));
 vi.mock("@/lib/admin/google/fetch", async () => {
   class GoogleApiError extends Error {
     constructor(message: string, readonly status: number) {

@@ -1,15 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const availability = vi.fn();
-const geocode = vi.fn();
-const confirmBooking = vi.fn();
+const readBusy = vi.fn();
+const createBookingEvent = vi.fn();
+vi.mock("@/lib/admin/booking/calendar", () => ({ readBusy, createBookingEvent }));
 
-vi.mock("@/lib/admin/booking/availability", () => ({ availability }));
-vi.mock("@/lib/admin/booking/mapbox", () => ({ geocode }));
-vi.mock("@/lib/admin/booking/confirm", () => ({ confirmBooking }));
-
-const { POST: availabilityPOST } = await import("./availability/route");
-const { POST: confirmPOST } = await import("./confirm/route");
+const { POST: busyPOST } = await import("./busy/route");
+const { POST: eventPOST } = await import("./event/route");
 
 const req = (body: unknown, auth: string | null = "Bearer s3cret") =>
   new Request("http://admin/api", {
@@ -17,6 +13,7 @@ const req = (body: unknown, auth: string | null = "Bearer s3cret") =>
     headers: { "content-type": "application/json", ...(auth ? { authorization: auth } : {}) },
     body: JSON.stringify(body),
   });
+const range = { timeMin: "2026-11-01T05:00:00.000Z", timeMax: "2026-12-15T06:00:00.000Z" };
 
 beforeEach(() => {
   process.env.BOOKING_API_SECRET = "s3cret";
@@ -27,34 +24,25 @@ afterEach(() => {
 
 describe("booking routes", () => {
   it("refuse a missing or wrong secret, and answer 503 when none is set", async () => {
-    expect((await availabilityPOST(req({ address: "x y z" }, null))).status).toBe(401);
-    expect((await confirmPOST(req({}, "Bearer nope"))).status).toBe(401);
+    expect((await busyPOST(req(range, null))).status).toBe(401);
+    expect((await eventPOST(req({ bookingId: crypto.randomUUID() }, "Bearer nope"))).status).toBe(401);
     delete process.env.BOOKING_API_SECRET;
-    expect((await availabilityPOST(req({ address: "x y z" }))).status).toBe(503);
-    expect(availability).not.toHaveBeenCalled();
+    expect((await busyPOST(req(range))).status).toBe(503);
+    expect(readBusy).not.toHaveBeenCalled();
+    expect(createBookingEvent).not.toHaveBeenCalled();
   });
 
-  it("answer an address that does not geocode with error: address", async () => {
-    geocode.mockResolvedValue(null);
-    expect(await (await availabilityPOST(req({ address: "nowhere at all" }))).json()).toEqual({ error: "address" });
+  it("read the busy events for a range", async () => {
+    readBusy.mockResolvedValue([]);
+    expect(await (await busyPOST(req(range))).json()).toEqual({ events: [] });
+    expect(readBusy).toHaveBeenCalledWith(range.timeMin, range.timeMax);
   });
 
-  it("use a picked suggestion's coordinates without geocoding", async () => {
-    availability.mockResolvedValue([{ date: "2026-11-02", slots: [] }]);
-    const res = await availabilityPOST(req({ address: "1 Main St", lat: 32, lng: -102 }));
-    expect(await res.json()).toEqual({ place: { address: "1 Main St", lat: 32, lng: -102 }, days: [{ date: "2026-11-02", slots: [] }] });
-    expect(geocode).not.toHaveBeenCalled();
-  });
-
-  it("refuse a malformed booking", async () => {
-    expect((await confirmPOST(req({ name: "Jo", email: "not-an-email" }))).status).toBe(400);
-    expect(confirmBooking).not.toHaveBeenCalled();
-  });
-
-  it("pass a valid booking through", async () => {
-    confirmBooking.mockResolvedValue({ ok: false, reason: "taken" });
-    const body = { name: "Jo", email: "jo@acme.com", company: "Acme", address: "1 Main St", lat: 32, lng: -102, start: "2026-11-02T16:00:00.000Z" };
-    expect(await (await confirmPOST(req(body))).json()).toEqual({ ok: false, reason: "taken" });
-    expect(confirmBooking).toHaveBeenCalledWith({ ...body, notes: "" });
+  it("create an event only for a booking id", async () => {
+    expect((await eventPOST(req({ bookingId: "not-a-uuid" }))).status).toBe(400);
+    const id = crypto.randomUUID();
+    createBookingEvent.mockResolvedValue({ eventId: "g1" });
+    expect(await (await eventPOST(req({ bookingId: id }))).json()).toEqual({ eventId: "g1" });
+    expect(createBookingEvent).toHaveBeenCalledWith(id);
   });
 });

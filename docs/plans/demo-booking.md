@@ -76,26 +76,26 @@ open slot is 12:30.
 
 ## Where it runs
 
-Google tokens and the Mapbox secret live in admin, so admin does the work and
-the landing only relays.
+Revised 2026-10-30: the slot math runs in the landing's server routes, so it
+ships with the landing. Admin only does what needs the owner's Google login.
+The browser never sees the calendar: it gets open slot starts and nothing else.
 
 ```
-landing /book ──> landing /api/book/{availability,confirm}
-                    │  server to server, shared secret BOOKING_API_SECRET
-                    v
-admin /api/gtm/booking/{availability,confirm}
-   ├── GTM db: demo_bookings
-   ├── Google Calendar (owner's connection, BOOKING_CALENDAR_USER_ID)
-   └── Mapbox geocoding + matrix (NEXT_PUBLIC_MAPBOX_TOKEN)
+landing /book (browser)
+   └── landing /api/book/{availability,confirm}   (server: rules, Mapbox, Texas check)
+         ├── GTM db: demo_bookings read + book_demo   (GTM secret key)
+         └── admin /api/gtm/booking/{busy,event}      (BOOKING_API_SECRET)
+               └── Google Calendar, owner's connection (BOOKING_CALENDAR_USER_ID)
+admin /bookings: the table, hover to Cancel (marks cancelled, deletes the event, Google emails the visitor)
 ```
 
-- **availability** `{ address, lat?, lng? }` → `{ place, days: { date, slots[] }[] }`,
-  or `{ error: "address" }` when the address does not geocode. Coordinates from
-  a picked suggestion are used as given; a typed address is geocoded. Google free/busy
-  (`events.list` on primary, `singleEvents=true`) is read once per request for
-  the whole window.
-- **confirm** `{ name, email, company, address, start, notes }` → re-checks
-  the slot under a lock, inserts the booking, then creates the Google event.
+- **availability** `{ address, lat?, lng? }` → `{ place, days }`, or
+  `{ error: "address" }` (no match) / `{ error: "texas" }` (outside Texas).
+  Coordinates from a picked suggestion are checked by reverse geocoding.
+- **confirm** re-checks the slot, books through `book_demo`, then asks admin
+  to create the event. A failed event leaves the booking "Not on calendar".
+- Demos are in Texas only; suggestions are bounded to Texas. The first meeting
+  of a day is open from the day's first slot wherever in Texas the office is.
 
 ## Database (GTM project)
 

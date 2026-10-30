@@ -2,7 +2,7 @@ import "server-only";
 import { getGtmDb } from "@/lib/admin/gtm/db";
 import { CALENDAR_API } from "@/lib/admin/google/calendar/client";
 import { GoogleApiError, googleFetch, googleUrl } from "@/lib/admin/google/fetch";
-import { calendarUserId } from "@/lib/admin/booking/availability";
+import { calendarUserId } from "@/lib/admin/booking/calendar";
 
 /**
  * Cancels a booking: the row is marked cancelled, which frees the slot, then

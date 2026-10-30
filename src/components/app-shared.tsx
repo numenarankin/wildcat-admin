@@ -26,6 +26,7 @@ import {
 	DatabaseIcon,
 	SettingsIcon,
 	TelescopeIcon,
+	RadarIcon,
 	SendIcon,
 	LandmarkIcon,
 	ListTodoIcon,
@@ -330,6 +331,7 @@ export const adminNavGroups: SidebarNavGroup[] = [
 		items: [
 			{ title: "Prospecting", path: "/prospecting", icon: <TelescopeIcon /> },
 			{ title: "Outbound", path: "/outbound", icon: <SendIcon /> },
+			{ title: "GTM", path: "/gtm", icon: <RadarIcon /> },
 			{ title: "Analytics", path: "/analytics", icon: <LineChartIcon /> },
 			{ title: "Finance", path: "/finance", icon: <LandmarkIcon /> },
 			{ title: "Clients", path: "/clients", icon: <UsersIcon /> },

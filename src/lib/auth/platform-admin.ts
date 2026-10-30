@@ -141,6 +141,16 @@ async function resolvePlatformAdminAccess(): Promise<PlatformAdminAccess> {
  * reason {@link requirePlatformAdmin} gives: a layout does not re-run on a
  * client-side navigation.
  */
+/**
+ * Server-action guard for one page: throws unless the caller is an admin
+ * whose list opens `page`. The page's own data must not be reachable through
+ * its actions by an admin the page itself would 404.
+ */
+export async function assertAdminPage(page: AdminPageKey): Promise<void> {
+  const access = await getPlatformAdminAccess();
+  if (!access.isAdmin || !access.pages.includes(page)) throw new Error("Not found.");
+}
+
 export async function requireAdminPage(page: AdminPageKey): Promise<void> {
   const access = await getPlatformAdminAccess();
   if (access.isAdmin && access.pages.includes(page)) return;

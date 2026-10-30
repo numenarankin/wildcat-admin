@@ -63,7 +63,8 @@ const DAY_HINT =
 const MONTH_HINT =
   "30-day: the average of the last 7 measured days against the average of the 7 measured days ending 30 days earlier. Same wells on both sides.";
 
-function Move({ value, hint }: { value: number | null; hint: string }) {
+/** One move with its hover explanation; `MovePair` is two of these. */
+export function Move({ value, hint }: { value: number | null; hint: string }) {
   return (
     <Tooltip>
       <TooltipTrigger

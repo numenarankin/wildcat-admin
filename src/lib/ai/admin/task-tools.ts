@@ -2,6 +2,7 @@ import "server-only";
 import { tool } from "ai";
 import { z } from "zod";
 import { getAdminTasks } from "@/lib/admin/tasks";
+import { importGoogleTasks } from "@/lib/admin/google/tasks/import";
 import { createAdminTask, deleteAdminTask, updateAdminTask } from "@/lib/admin/task-actions";
 import { getAdminProjects } from "@/lib/admin/projects";
 import { listPlatformAdmins } from "@/lib/admin/team";
@@ -110,6 +111,14 @@ export function taskTools() {
         projectId: z.string().optional(),
       }),
       execute: async ({ column, projectId } = {}) => {
+        // The board as it would be on opening it: the user's new Google tasks first.
+        let googleImport: string | null = null;
+        try {
+          const r = await importGoogleTasks();
+          if ("added" in r && r.added > 0) googleImport = `${r.added} new Google task(s) were just added to Queue.`;
+        } catch (err) {
+          googleImport = `Could not check Google Tasks: ${err instanceof Error ? err.message : "unknown error"}. Tasks added in Google since the board was last opened may be missing.`;
+        }
         const [tasks, projects, team] = await Promise.all([getAdminTasks(projectId), getAdminProjects(), listPlatformAdmins()]);
         const names = new Map(projects.map((p) => [p.id, p.name]));
         const listed = column ? tasks.filter((t) => t.status === statusOf(column)) : tasks;
@@ -118,6 +127,7 @@ export function taskTools() {
           columns: COLUMN_LABELS,
           assignees: team.map((m) => m.email),
           projects: projects.map((p) => ({ id: p.id, name: p.name })),
+          ...(googleImport ? { googleImport } : {}),
         };
       },
     }),

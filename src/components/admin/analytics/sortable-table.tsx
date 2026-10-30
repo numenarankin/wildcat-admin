@@ -34,12 +34,15 @@ export function SortableTable<T>({
   rowKey,
   defaultSort,
   empty,
+  onRowClick,
 }: {
   rows: T[];
   columns: SortColumn<T>[];
   rowKey: (row: T) => string;
   defaultSort: string;
   empty: string;
+  /** Makes each row open something (a detail panel); the row reads as clickable. */
+  onRowClick?: (row: T) => void;
 }) {
   const [sortKey, setSortKey] = useState(defaultSort);
   const [direction, setDirection] = useState<"asc" | "desc">("desc");
@@ -107,7 +110,11 @@ export function SortableTable<T>({
             </TableRow>
           ) : (
             sorted.map((row) => (
-              <TableRow key={rowKey(row)} className="[&>td]:py-3.5">
+              <TableRow
+                key={rowKey(row)}
+                className={cn("[&>td]:py-3.5", onRowClick && "cursor-pointer")}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
                 {columns.map((col) => (
                   <TableCell
                     key={col.key}

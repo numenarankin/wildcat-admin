@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireGoogleAdminId } from "@/lib/admin/google/guard";
+import { googleErrorMessage } from "@/lib/admin/google/fetch";
+import { importGoogleTasks } from "@/lib/admin/google/tasks/import";
 import { deleteTask, insertTask, patchTask } from "@/lib/admin/google/tasks/client";
 import {
   isGoogleListId,
@@ -54,4 +56,24 @@ export async function moveGoogleTask(id: string, status: TaskStatus): Promise<vo
   const google = statusToGoogle(status);
   await patchTask(userId, listId, taskId, google === "needsAction" ? { status: google, completed: null } : { status: google });
   revalidatePath(TASKS_PATH);
+}
+
+/**
+ * Pull the caller's new open Google tasks onto the team board (Queue). Called
+ * by the board on load (`GoogleTasksImport`); see `tasks/import.ts`. A result,
+ * not a throw, so the board can say why it failed.
+ */
+export async function syncGoogleTasksToBoard(): Promise<{ added: number } | { error: string }> {
+  try {
+    const r = await importGoogleTasks();
+    const added = "added" in r ? r.added : 0;
+    if (added > 0) {
+      revalidatePath(TASKS_PATH);
+      revalidatePath("/projects", "layout");
+    }
+    return { added };
+  } catch (error) {
+    console.error("syncGoogleTasksToBoard failed", error);
+    return { error: googleErrorMessage(error, "Tasks") };
+  }
 }

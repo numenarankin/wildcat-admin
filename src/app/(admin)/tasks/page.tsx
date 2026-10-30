@@ -1,5 +1,6 @@
 import { TasksBoard } from "@/components/tasks/tasks-board";
 import { TaskSourcePicker } from "@/components/admin/task-source-picker";
+import { GoogleTasksImport } from "@/components/admin/google-tasks-import";
 import { SettingsMessage } from "@/components/settings/panel";
 import { requireAdminPage } from "@/lib/auth/platform-admin";
 import { getAdminTasks } from "@/lib/admin/tasks";
@@ -22,7 +23,8 @@ const GOOGLE_HIDDEN: readonly TaskField[] = ["assignee", "priority", "deadlineTi
 
 /**
  * The admin team's task board: the customer Tasks page over `admin_tasks`.
- * With Google Tasks connected,
+ * With Google Tasks connected, opening it adds the admin's new open Google
+ * tasks to Queue (`GoogleTasksImport`), and
  * `?source=google:<listId>`
  * shows one of the admin's own Google lists on the same board instead
  * (docs/plans/google-integration.md D4).
@@ -84,6 +86,8 @@ export default async function AdminTasksPage({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       {listsError && <SettingsMessage error={listsError} />}
+      {/* New open Google tasks land in Queue (tasks/import.ts). */}
+      {userId && !listsError && <GoogleTasksImport />}
       <TasksBoard
         tasks={tasks}
         // The admin roster is the assignee list: the board is the team's.

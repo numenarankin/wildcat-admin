@@ -23,6 +23,8 @@ vi.mock("@/lib/admin/task-actions", () => ({
 }));
 vi.mock("@/lib/admin/projects", () => ({ getAdminProjects: async () => [{ id: "p1", name: "Q4 Launch" }] }));
 vi.mock("@/lib/admin/team", () => ({ listPlatformAdmins: async () => [{ email: "rankin@wildcatiq.ai" }] }));
+const importGoogleTasks = vi.fn(async (): Promise<{ added: number }> => ({ added: 0 }));
+vi.mock("@/lib/admin/google/tasks/import", () => ({ importGoogleTasks: () => importGoogleTasks() }));
 
 type Exec = (input: unknown, opts?: unknown) => Promise<Record<string, unknown>>;
 const run = async (name: string, input: unknown) => {
@@ -60,6 +62,15 @@ describe("taskTools", () => {
     expect(r.columns).toEqual(["Backlog", "Queue", "Doing", "Done"]);
     expect(r.assignees).toEqual(["rankin@wildcatiq.ai"]);
     expect((await run("list_team_tasks", { column: "Done" })).tasks).toEqual([]);
+  });
+
+  it("pulls new Google tasks before reading the board, and says so", async () => {
+    importGoogleTasks.mockResolvedValueOnce({ added: 2 });
+    const r = await run("list_team_tasks", {});
+    expect(importGoogleTasks).toHaveBeenCalledTimes(1);
+    expect(r.googleImport).toMatch(/2 new Google task/);
+    importGoogleTasks.mockRejectedValueOnce(new Error("token expired"));
+    expect((await run("list_team_tasks", {})).googleImport).toMatch(/Could not check Google Tasks: token expired/);
   });
 
   it("creates every task in the list, in Backlog at Medium unless told otherwise", async () => {

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/send-scheduled-emails",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/gtm-snitcher-locations",
+      "schedule": "0 * * * *"
     }
   ]
 }
